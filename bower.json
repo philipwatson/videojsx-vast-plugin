@@ -1,0 +1,10 @@
+{
+   "name": "myvideo",
+   "version": "0.0.1",
+   "dependencies": {
+      "videojs": "5.4.5",
+      "videojs-contrib-ads": "3.1.2",
+      "vast-client-js": "1.3.6"
+   },
+   "private": true
+}

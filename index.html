@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <link href="bower_components/videojs/dist/video-js.css" rel="stylesheet">
+    <script src="bower_components/videojs/dist/video.js"></script>
+
+    <link href="bower_components/videojs-contrib-ads/src/videojs.ads.css" rel="stylesheet">
+    <script src="bower_components/videojs-contrib-ads/src/videojs.ads.js"></script>
+
+    <script src="bower_components/vast-client-js/vast-client.js"></script>
+    <script src="videojs.vast.js"></script>
+</head>
+
+<body>
+
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup="{}">
+    <source src="clips/content.mp4" type="video/mp4">
+    Your browser does not support video.
+</video>
+
+<script type="text/javascript">
+    var vid1 = videojs("vid1");
+    vid1.ads();
+    vid1.vast({url: "vast_examples/vast1.xml"});
+</script>
+
+</body>
+
+</html>
