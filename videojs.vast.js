@@ -28,49 +28,14 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
             // return vast plugin
             return {
                 createSourceObjects: function (media_files) {
-                    var sourcesByFormat = {}, i, j, tech;
-                    var techOrder = player.options().techOrder;
-                    for (i = 0, j = techOrder.length; i < j; i++) {
-                        var techName = techOrder[i].charAt(0).toUpperCase() + techOrder[i].slice(1);
-                        tech = window.videojs[techName];
+                    var allSources = [];
 
-                        // Check if the current tech is defined before continuing
-                        if (!tech) {
-                            continue;
-                        }
-
-                        // Check if the browser supports this technology
-                        if (tech.isSupported()) {
-                            // Loop through each source object
-                            for (var a = 0, b = media_files.length; a < b; a++) {
-                                var media_file = media_files[a];
-                                var source = {type:media_file.mimeType, src:media_file.fileURL};
-                                // Check if source can be played with this technology
-                                if (tech.canPlaySource(source)) {
-                                    if (sourcesByFormat[techOrder[i]] === undefined) {
-                                        sourcesByFormat[techOrder[i]] = [];
-                                    }
-                                    sourcesByFormat[techOrder[i]].push({
-                                        type:media_file.mimeType,
-                                        src: media_file.fileURL,
-                                        width: media_file.width,
-                                        height: media_file.height
-                                    });
-                                }
-                            }
-                        }
+                    for (var a = 0, b = media_files.length; a < b; a++) {
+                        var media_file = media_files[a];
+                        var source = {type:media_file.mimeType, src:media_file.fileURL};
+                        allSources.push(source);
                     }
-                    // Create sources in preferred format order
-                    var sources = [];
-                    for (j = 0; j < techOrder.length; j++) {
-                        tech = techOrder[j];
-                        if (sourcesByFormat[tech] !== undefined) {
-                            for (i = 0; i < sourcesByFormat[tech].length; i++) {
-                                sources.push(sourcesByFormat[tech][i]);
-                            }
-                        }
-                    }
-                    return sources;
+                    return allSources;
                 },
 
                 getContent: function () {
@@ -230,7 +195,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
 
                     player.vast.setupEvents();
 
-                    player.one('ended', player.vast.tearDown);
+                    player.one('adended', player.vast.tearDown);
 
                     player.trigger('vast-preroll-ready');
                 },
