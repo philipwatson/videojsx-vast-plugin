@@ -106,7 +106,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                         },
                         pauseFn = function() {
                             player.vastTracker.setPaused(true);
-                            player.one('play', function(){
+                            player.one('adplay', function(){
                                 player.vastTracker.setPaused(false);
                             });
                         },
@@ -117,16 +117,16 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                             player.trigger('ended');
                         };
 
-                    player.on('canplay', canplayFn);
-                    player.on('timeupdate', timeupdateFn);
-                    player.on('pause', pauseFn);
-                    player.on('error', errorFn);
+                    player.on('adcanplay', canplayFn);
+                    player.on('adtimeupdate', timeupdateFn);
+                    player.on('adpause', pauseFn);
+                    player.on('aderror', errorFn);
 
                     player.one('vast-preroll-removed', function() {
-                        player.off('canplay', canplayFn);
-                        player.off('timeupdate', timeupdateFn);
-                        player.off('pause', pauseFn);
-                        player.off('error', errorFn);
+                        player.off('adcanplay', canplayFn);
+                        player.off('adtimeupdate', timeupdateFn);
+                        player.off('adpause', pauseFn);
+                        player.off('aderror', errorFn);
                         if (!errorOccurred) {
                             player.vastTracker.complete();
                         }
@@ -179,7 +179,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                     player.vast.skipButton = skipButton;
                     player.el().appendChild(skipButton);
 
-                    player.on("timeupdate", player.vast.timeupdate);
+                    player.on("adtimeupdate", player.vast.timeupdate);
 
                     skipButton.onclick = function(e) {
                         if((' ' + player.vast.skipButton.className + ' ').indexOf(' enabled ') >= 0) {
@@ -206,7 +206,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                     player.vast.blocker.parentNode.removeChild(player.vast.blocker);
 
                     // remove vast-specific events
-                    player.off('timeupdate', player.vast.timeupdate);
+                    player.off('adtimeupdate', player.vast.timeupdate);
                     player.off('ended', player.vast.tearDown);
 
                     // end ad mode
@@ -281,7 +281,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                 player.vast.preroll();
             });
 
-            // make an ads request immediately so we're ready when the viewer hits "play"
+            // make an ads request immediately so we're ready when the viewer hits ad
             if (player.currentSrc()) {
                 player.vast.getContent(settings.url);
             }
