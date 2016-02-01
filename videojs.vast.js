@@ -41,7 +41,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                 getContent: function () {
 
                     // query vast url given in settings
-                    vast.client.get(settings.url, function(response) {
+                    vast.client.get(settings.url, {withCredentials: true}, function(response) {
                         if (response) {
                             // we got a response, deal with it
                             for (var adIdx = 0; adIdx < response.ads.length; adIdx++) {
