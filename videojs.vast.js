@@ -29,18 +29,19 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
             return {
                 createSourceObjects: function (media_files) {
                     var allSources = [];
-
                     for (var a = 0, b = media_files.length; a < b; a++) {
                         var media_file = media_files[a];
                         var source = {type:media_file.mimeType, src:media_file.fileURL};
                         allSources.push(source);
                     }
+                    // return all sources and let the player decide which one it can play
                     return allSources;
                 },
 
                 getContent: function () {
 
                     // query vast url given in settings
+                    // withCredentials option turned on so we allow third party cookies
                     vast.client.get(settings.url, {withCredentials: true}, function(response) {
                         if (response) {
                             // we got a response, deal with it
@@ -281,7 +282,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
                 player.vast.preroll();
             });
 
-            // make an ads request immediately so we're ready when the viewer hits ad
+            // make an ads request immediately so we're ready when the viewer hits "play"
             if (player.currentSrc()) {
                 player.vast.getContent(settings.url);
             }

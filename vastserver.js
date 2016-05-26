@@ -127,7 +127,7 @@ var pageServer = http.createServer(function(req, res) {
 // different port to test cross-domain requests (i.e., third party cookie)
 pageServer.listen(9998, function() {
     console.log("Page server listening on port 9998");
-})
+});
 
 vastServer.listen(9999, function() {
     console.log("Vast server listening on port 9999");
