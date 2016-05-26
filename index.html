@@ -21,10 +21,43 @@
     Your browser does not support video.
 </video>
 
+
 <script type="text/javascript">
-    var vid1 = videojs("vid1");
-    vid1.ads();
-    vid1.vast({url: "http://localhost:9999/vast_examples/vast1.xml"});
+     function parseQueryString(queryString) {
+        if (queryString.substring(0, 1) === "?") {
+            queryString = queryString.substring(1);
+        }
+
+        var params = {};
+        var queries = queryString.split("&");
+
+        for (var i = 0; i < queries.length; i++) {
+            var temp = queries[i].split('=');
+            params[temp[0]] = decodeURIComponent(temp[1]);
+        }
+
+        return params;
+    }
+</script>
+
+
+<script type="text/javascript">
+    var params = parseQueryString(location.search);
+    var vastUrl = params.vast;
+
+    if (vastUrl == undefined || vastUrl === "") {
+        document.write("<p>You can provide the vast query param to see an advert.</p>");
+        document.write("<p>Examples:</p>");
+
+        var baseUrl = location.origin + location.pathname;
+        document.write("<p>" + baseUrl + "?vast=http://somewhere.com/vast?id=123</p>");
+        document.write("<p>" + baseUrl + "?vast=" + encodeURIComponent("http://somewhere.com/vast?id=123&abc=123") + "</p>");
+    }
+    else {
+        var vid1 = videojs("vid1");
+        vid1.ads();
+        vid1.vast({url: vastUrl});
+    }
 </script>
 
 </body>
