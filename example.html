@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test</title>
+    <title>Example</title>
     <link href="bower_components/videojs/dist/video-js.css" rel="stylesheet">
     <script src="bower_components/videojs/dist/video.js"></script>
 
@@ -10,8 +10,8 @@
 
     <script src="bower_components/vast-client-js/vast-client.js"></script>
 
-    <link href="videojs.vast.css" rel="stylesheet">
-    <script src="videojs.vast.js"></script>
+    <link href="videojs5.vast.css" rel="stylesheet">
+    <script src="videojs5.vast.js"></script>
 </head>
 
 <body>
@@ -52,11 +52,12 @@
         var baseUrl = location.origin + location.pathname;
         document.write("<p>" + baseUrl + "?vast=http://somewhere.com/vast?id=123</p>");
         document.write("<p>" + baseUrl + "?vast=" + encodeURIComponent("http://somewhere.com/vast?id=123&abc=123") + "</p>");
+        document.write("<p>You can use <a target='_blank' href='http://meyerweb.com/eric/tools/dencoder/'>this tool</a> to encode your url if needed.</p>")
     }
     else {
         var vid1 = videojs("vid1");
         vid1.ads();
-        vid1.vast({url: vastUrl});
+        vid1.vast({url: vastUrl/*, skip:-1*/});
     }
 </script>
 

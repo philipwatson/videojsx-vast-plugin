@@ -105,14 +105,14 @@ var pageServer = http.createServer(function(req, res) {
                 }
 
                 // brittle
-                if (filename.indexOf("css") > -1) {
-                    res.setHeader("content-type", "text/css");
+                if (filename.indexOf(".css") > -1) {
+                    res.setHeader("Content-type", "text/css");
                 }
-                else if (filename.indexOf("js") > -1) {
-                    res.setHeader("content-type", "text/javascript");
+                else if (filename.indexOf(".js") > -1) {
+                    res.setHeader("Content-type", "text/javascript");
                 }
-                else if (filename.indexOf("html") > -1) {
-                    res.setHeader("content-type", "text/html");
+                else if (filename.indexOf(".html") > -1) {
+                    res.setHeader("Content-type", "text/html");
                 }
 
                 res.writeHead(200);
