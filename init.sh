@@ -57,4 +57,5 @@ fi
 
 bower install
 
+echo "note: be sure to build videojs-contrib-ads in bower_components (see its README.md)"
 echo "done."
