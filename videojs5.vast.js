@@ -284,9 +284,9 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
 
             // make an ads request immediately so we're ready when the viewer hits "play"
             // FireFox fix (stop it calling vast twice)
-            /*if (player.currentSrc()) {
+            if (!navigator.userAgent.includes("Firefox") && player.currentSrc()) {
                 player.vast.getContent(settings.url);
-            }*/
+            }
 
             // return player to allow this plugin to be chained
             return player;
