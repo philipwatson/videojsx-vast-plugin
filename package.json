@@ -1,0 +1,33 @@
+{
+  "name": "videojsx-vast-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "build": "",
+    "start": "",
+    "serve": "",
+    "test": "",
+    "lint": ""
+  },
+  "author": "Philip Watson",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/philipwatson/videojsx-vast-plugin"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "vast-client": "^2.0.4",
+    "video.js": "^7.2.3",
+    "videojs-contrib-ads": "^6.6.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
+    "css-loader": "^1.0.0",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.12.1",
+    "webpack-cli": "^3.0.8"
+  }
+}
