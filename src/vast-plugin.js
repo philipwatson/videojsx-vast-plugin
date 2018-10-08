@@ -9,16 +9,25 @@ function createSourceObjects(mediaFiles) {
   return mediaFiles.map(mediaFile => ({type: mediaFile.mimeType, src: mediaFile.fileURL}));
 }
 
+const defaultOptions = {
+  seekEnabled: false,
+  controlsEnabled: false,
+  wrapperLimit: 10,
+  withCredentials: true
+};
+
 export default class VastPlugin extends Plugin {
   constructor(player, options) {
     super(player);
 
     player.ads({debug:true});
 
+    options = videojs.mergeOptions(defaultOptions, options || {});
+
     this.options = options;
 
     this.vastClient = new VASTClient();
-
+    this.originalPlayerState = {};
     this.eventListeners = {};
     this.domElements = {};
 
@@ -43,7 +52,8 @@ export default class VastPlugin extends Plugin {
   }
 
   _getVastContent(url) {
-    this.vastClient.get(url, {withCredentials: true, wrapperLimit: 10})
+    const options = this.options;
+    this.vastClient.get(url, {withCredentials: options.withCredentials, wrapperLimit: options.wrapperLimit})
       .then(res => {
 
         const linearFn = creative => creative.type === 'linear';
@@ -74,15 +84,25 @@ export default class VastPlugin extends Plugin {
 
   _doPreroll() {
     const player = this.player;
+    const options = this.options;
 
     player.ads.startLinearAdMode();
-    if (player.controls()) {
-      player.controls(false);
+
+    this.originalPlayerState.controlsEnabled = player.controls();
+    player.controls(options.controlsEnabled);
+
+    this.originalPlayerState.seekEnabled = player.controlBar.progressControl.enabled();
+    if (options.seekEnabled) {
+      player.controlBar.progressControl.enable();
     }
+    else {
+      player.controlBar.progressControl.disable();
+    }
+
 
     player.src(this.sources);
 
-    var blocker = window.document.createElement('div');
+    const blocker = window.document.createElement('div');
     blocker.className = 'vast-blocker';
     blocker.onclick = () => {
       if (player.paused()) {
@@ -100,7 +120,7 @@ export default class VastPlugin extends Plugin {
     this.domElements.blocker = blocker;
     player.el().insertBefore(blocker, player.controlBar.el());
 
-    var skipButton = window.document.createElement('div');
+    const skipButton = window.document.createElement('div');
     skipButton.className = 'vast-skip-button';
     if (this.options.skip < 0) {
       skipButton.style.display = 'none';
@@ -128,13 +148,13 @@ export default class VastPlugin extends Plugin {
 
     this._setupEvents();
 
-    player.one('adended', this.eventListeners._tearDown);
+    player.one('adended', this.eventListeners.teardown);
   }
 
   _timeUpdate () {
     const player = this.player;
     player.loadingSpinner.el().style.display = 'none';
-    var timeLeft = Math.ceil(this.options.skip - player.currentTime());
+    const timeLeft = Math.ceil(this.options.skip - player.currentTime());
     if(timeLeft > 0) {
       this.domElements.skipButton.innerHTML = 'Skip in ' + timeLeft + '...';
     } else {
@@ -153,8 +173,13 @@ export default class VastPlugin extends Plugin {
 
     player.ads.endLinearAdMode();
 
-    if (!player.controls()) {
-      player.controls(true);
+    player.controls(this.originalPlayerState.controlsEnabled);
+
+    if (this.originalPlayerState.seekEnabled) {
+      player.controlBar.progressControl.enable();
+    }
+    else {
+      player.controlBar.progressControl.disable();
     }
 
     player.trigger('vast-done');
@@ -192,16 +217,52 @@ export default class VastPlugin extends Plugin {
       // ?? player.trigger('ended');
     };
 
+    const fullScreenFn = function() {
+      // for 'fullscreen' & 'exitfullscreen'
+      tracker.setFullscreen(player.isFullscreen());
+    };
+
+    const muteFn = (function(){
+      let previousMuted = player.muted();
+      let previousVolume = player.volume();
+
+      return function() {
+        const volumeNow = player.volume();
+        const mutedNow = player.muted();
+
+        if (previousMuted !== mutedNow) {
+          tracker.setMuted(mutedNow);
+          previousMuted = mutedNow;
+        }
+        else if (previousVolume !== volumeNow) {
+          if (previousVolume > 0 && volumeNow === 0) {
+            tracker.setMuted(true);
+          }
+          else if (previousVolume === 0 && volumeNow > 0) {
+            tracker.setMuted(false);
+          }
+
+          previousVolume = volumeNow;
+        }
+      }
+    })();
+
     player.on('adcanplay', canplayFn);
     player.on('adtimeupdate', timeupdateFn);
     player.on('adpause', pauseFn);
     player.on('aderror', errorFn);
+    player.on('advolumechange', muteFn);
+    player.on('fullscreenchange', fullScreenFn);
+
 
     player.one('vast-done', function() {
       player.off('adcanplay', canplayFn);
       player.off('adtimeupdate', timeupdateFn);
       player.off('adpause', pauseFn);
       player.off('aderror', errorFn);
+      player.off('advolumechange', muteFn);
+      player.off('fullscreenchange', fullScreenFn);
+
       if (!errorOccurred) {
         tracker.complete();
       }
