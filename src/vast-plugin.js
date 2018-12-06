@@ -31,7 +31,7 @@ export default class VastPlugin extends Plugin {
     this.eventListeners = {};
     this.domElements = {};
 
-    player.on('play', () => {
+    player.one('play', () => {
       this._getVastContent(options.url);
     });
 
