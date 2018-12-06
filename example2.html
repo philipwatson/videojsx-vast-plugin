@@ -15,6 +15,13 @@
 </video>
 
 <script src="dist/player.js"></script>
+
+
+<script>
+  var player = videojs('vid1');
+  player.vast({url: "https://tester.advertserve.com/servlet/vast3/zone?zid=33&pid=0&contextual=true", skip: 8});
+</script>
+
 </body>
 
 </html>
