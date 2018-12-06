@@ -65,6 +65,17 @@ export default class VastPlugin extends Plugin {
 
         const companionCreative = adWithLinear.creatives.find(companionFn);
 
+        if (options.companion) {
+          const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
+
+          if (variation && variation.staticResource && variation.type.indexOf("image") === 0) {
+            const dest = document.getElementById(options.companion.elementId);
+            dest.innerHTML = `<img src="${variation.staticResource}"/>`;
+          }
+        }
+
+        console.log("RESULT: " + JSON.stringify(companionCreative));
+
         this.sources = createSourceObjects(linearCreative.mediaFiles);
 
         this.tracker = new VASTTracker(this.vastClient, adWithLinear, linearCreative, companionCreative);

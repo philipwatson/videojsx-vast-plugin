@@ -13,13 +13,22 @@
   <source id ="mysrc" src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4" type="video/mp4">
   Your browser does not support video.
 </video>
+<div id="companion"></div>
 
 <script src="dist/player.js"></script>
 
 
 <script>
   var player = videojs('vid1');
-  player.vast({url: "https://tester.advertserve.com/servlet/vast3/zone?zid=33&pid=0&contextual=true", skip: 8});
+
+  var companion = {
+    elementId: "companion",
+    maxWidth: 300,
+    maxHeight: 250
+  };
+
+  player.vast({url: "https://tester.advertserve.com/servlet/vast3/zone?zid=33&pid=0&contextual=true", skip: 8, companion: companion});
+
 </script>
 
 </body>
