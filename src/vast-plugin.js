@@ -67,18 +67,24 @@ export default class VastPlugin extends Plugin {
 
         if (options.companion) {
           const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
-
-          if (variation && variation.staticResource && variation.type.indexOf("image") === 0) {
-            const clickThroughUrl  = variation.companionClickThroughURLTemplate;
-            const dest = document.getElementById(options.companion.elementId);
-            let html;
-            if (clickThroughUrl) {
-              html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`
+          if (variation) {
+            if (variation.staticResource) {
+              if (variation.type.indexOf("image") === 0) {
+                const clickThroughUrl = variation.companionClickThroughURLTemplate;
+                const dest = document.getElementById(options.companion.elementId);
+                let html;
+                if (clickThroughUrl) {
+                  html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`
+                } else {
+                  html = `<img src="${variation.staticResource}"/>`;
+                }
+                dest.innerHTML = html;
+              } else if (["application/x-javascript", "text/javascript", "application/javascript"].indexOf(variation.type) > -1) {
+                // handle script
+              } else if (variation.type === "application/x-shockwave-flash") {
+                // handle flash
+              }
             }
-            else {
-              html = `<img src="${variation.staticResource}"/>`;
-            }
-            dest.innerHTML = html;
           }
         }
 
