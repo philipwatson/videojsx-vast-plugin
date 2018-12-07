@@ -69,12 +69,20 @@ export default class VastPlugin extends Plugin {
           const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
 
           if (variation && variation.staticResource && variation.type.indexOf("image") === 0) {
+            const clickThroughUrl  = variation.companionClickThroughURLTemplate;
             const dest = document.getElementById(options.companion.elementId);
-            dest.innerHTML = `<img src="${variation.staticResource}"/>`;
+            let html;
+            if (clickThroughUrl) {
+              html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`
+            }
+            else {
+              html = `<img src="${variation.staticResource}"/>`;
+            }
+            dest.innerHTML = html;
           }
         }
 
-        console.log("RESULT: " + JSON.stringify(companionCreative));
+        // console.log("RESULT: " + JSON.stringify(companionCreative));
 
         this.sources = createSourceObjects(linearCreative.mediaFiles);
 
