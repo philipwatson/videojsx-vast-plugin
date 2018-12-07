@@ -1,11 +1,11 @@
 {
   "name": "videojsx-vast-plugin",
   "version": "1.0.0",
-  "description": "",
+  "description": "HTML5 video player with VAST support",
   "main": "",
   "scripts": {
-    "build": "",
-    "start": "",
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack-dev-server --config webpack.dev.js",
     "serve": "",
     "test": "",
     "lint": ""
@@ -25,10 +25,12 @@
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
+    "compression-webpack-plugin": "^2.0.0",
     "css-loader": "^1.0.0",
     "style-loader": "^0.23.0",
     "webpack": "^4.12.1",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.10"
+    "webpack-dev-server": "^3.1.10",
+    "webpack-merge": "^4.1.4"
   }
 }
