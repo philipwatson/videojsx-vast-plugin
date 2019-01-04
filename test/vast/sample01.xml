@@ -1,0 +1,95 @@
+<VAST version="3.0">
+    <Ad id="123">
+        <InLine>
+            <AdSystem>Partner100</AdSystem>
+            <AdTitle>
+                <![CDATA[ Title ]]>
+            </AdTitle>
+            <Description>
+                <![CDATA[ Description ]]>
+            </Description>
+            <Impression id="Partner100">
+                <![CDATA[http://localhost:{{port}}/track/impression?id=123]]>
+            </Impression>
+            <Creatives>
+                <Creative AdID="123-Video">
+                    <Linear>
+                        <Duration>00:00:05</Duration>
+                        <TrackingEvents>
+                            <Tracking event="creativeView">
+                                <![CDATA[http://localhost:{{port}}/track/linear/creativeView?id=123]]>
+                            </Tracking>
+                            <Tracking event="start">
+                                <![CDATA[http://localhost:{{port}}/track/start?id=123]]>
+                            </Tracking>
+                            <Tracking event="firstQuartile">
+                                <![CDATA[http://localhost:{{port}}/track/firstQuartile?id=123]]>
+                            </Tracking>
+                            <Tracking event="midpoint">
+                                <![CDATA[http://localhost:{{port}}/track/midpoint?id=123]]>
+                            </Tracking>
+                            <Tracking event="thirdQuartile">
+                                <![CDATA[http://localhost:{{port}}/track/thirdQuartile?id=123]]>
+                            </Tracking>
+                            <Tracking event="complete">
+                                <![CDATA[http://localhost:{{port}}/track/complete?id=123]]>
+                            </Tracking>
+                            <Tracking event="mute">
+                                <![CDATA[http://localhost:{{port}}/track/mute?id=123]]>
+                            </Tracking>
+                            <Tracking event="unmute">
+                                <![CDATA[http://localhost:{{port}}/track/unmute?id=123]]>
+                            </Tracking>
+                            <Tracking event="pause">
+                                <![CDATA[http://localhost:{{port}}/track/pause?id=123]]>
+                            </Tracking>
+                            <Tracking event="resume">
+                                <![CDATA[http://localhost:{{port}}/track/resume?id=123]]>
+                            </Tracking>
+                            <Tracking event="fullscreen">
+                                <![CDATA[http://localhost:{{port}}/track/fullscreen?id=123]]>
+                            </Tracking>
+                            <Tracking event="skip">
+                                <![CDATA[http://localhost:{{port}}/track/skip?id=123]]>
+                            </Tracking>
+                            <Tracking event="close">
+                                <![CDATA[http://localhost:{{port}}/track/close?id=123]]>
+                            </Tracking>
+                        </TrackingEvents>
+                        <VideoClicks>
+                            <ClickThrough>
+                                <![CDATA[http://localhost:{{port}}/page/landing-page.html]]>
+                            </ClickThrough>
+                            <ClickTracking id="Partner100">
+                                <![CDATA[http://localhost:{{port}}/track/clickTracking?id=123]]>
+                            </ClickTracking>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile delivery="progressive" type="video/mp4" bitrate="400" width="640" height="360"
+                                       scalable="true" maintainAspectRatio="true">
+                                <![CDATA[http://localhost:{{port}}/creative/video-960x540-5s.mp4]]>
+                            </MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+                <Creative AdID="123-Companions">
+                    <CompanionAds required="none">
+                        <Companion width="300" height="250">
+                            <StaticResource creativeType="image/jpeg">
+                                <![CDATA[http://localhost:{{port}}/creative/image-300x250.jpg]]>
+                            </StaticResource>
+                            <TrackingEvents>
+                                <Tracking event="creativeView">
+                                    <![CDATA[http://localhost:{{port}}/track/creativeView?id=123]]>
+                                </Tracking>
+                            </TrackingEvents>
+                            <CompanionClickThrough>
+                                <![CDATA[http://localhost:{{port}}/page/landing-page.html]]>
+                            </CompanionClickThrough>
+                        </Companion>
+                    </CompanionAds>
+                </Creative>
+            </Creatives>
+        </InLine>
+    </Ad>
+</VAST>

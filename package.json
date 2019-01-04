@@ -7,8 +7,12 @@
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --config webpack.dev.js",
     "serve": "",
-    "test": "",
+    "test": "jest",
     "lint": ""
+  },
+  "jest": {
+    "preset": "jest-puppeteer",
+    "globalSetup": "./config/puppeteer/global-setup.js"
   },
   "author": "Philip Watson",
   "repository": {
@@ -26,11 +30,18 @@
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "compression-webpack-plugin": "^2.0.0",
+    "cors": "^2.8.5",
     "css-loader": "^1.0.0",
+    "express": "^4.16.4",
+    "jest": "^23.6.0",
+    "jest-puppeteer": "^3.7.0",
+    "mustache-express": "^1.2.8",
+    "portfinder": "^1.0.20",
+    "puppeteer": "^1.11.0",
     "style-loader": "^0.23.0",
     "webpack": "^4.12.1",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.10",
+    "webpack-dev-server": "^3.1.14",
     "webpack-merge": "^4.1.4"
   }
 }
