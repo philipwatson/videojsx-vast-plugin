@@ -6,3 +6,4 @@
 * Auto build & serve for easier development
 * Execute non-linear ad events (click, view, etc)
 * Bundle in css into artifact
+* Handle bad xml / no compatible source was found error (should continue to play content)
