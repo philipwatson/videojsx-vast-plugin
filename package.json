@@ -2,7 +2,7 @@
   "name": "videojsx-vast-plugin",
   "version": "1.0.0",
   "description": "HTML5 video player with VAST support",
-  "main": "",
+  "main": "dist/player.js",
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start": "webpack-dev-server --config webpack.dev.js",
