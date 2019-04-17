@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Example</title>
+</head>
+
+<body>
+
+<!-- 'Big Buck Bunny' licensed under CC 3.0 by the Blender foundation. Hosted by archive.org -->
+<!-- Poster from peach.blender.org -->
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
+  <source id ="mysrc" src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4" type="video/mp4">
+  Your browser does not support video.
+</video>
+<div id="companion"></div>
+
+<script src="http://localhost:8080/player.js"></script>
+
+<script>
+  var player = videojs('vid1');
+
+  var companion = {
+    elementId: "companion",
+    maxWidth: 300,
+    maxHeight: 250
+  };
+
+  player.vast({url: 'http://localhost:8080/vast.xml', skip: 8, companion: companion});
+</script>
+
+</body>
+
+</html>
