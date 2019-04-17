@@ -147,14 +147,18 @@ export default class VastPlugin extends Plugin {
 
     const skipButton = window.document.createElement('div');
     skipButton.className = 'vast-skip-button';
-    if (this.options.skip < 0) {
-      skipButton.style.display = 'none';
-    }
+    skipButton.style.display = 'none';
     this.domElements.skipButton = skipButton;
     player.el().appendChild(skipButton);
 
+
     this.eventListeners.adtimeupdate = () => this._timeUpdate();
-    player.on('adtimeupdate', this.eventListeners.adtimeupdate);
+    player.one('adplay', () => {
+      if (this.options.skip > 0 && player.duration() >= this.options.skip) {
+        skipButton.style.display = 'block';
+        player.on('adtimeupdate', this.eventListeners.adtimeupdate);
+      }
+    });
 
     this.eventListeners.teardown = () => this._tearDown();
 
