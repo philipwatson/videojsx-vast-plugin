@@ -4,6 +4,10 @@ const mustacheExpress = require('mustache-express');
 const cors = require('cors');
 const path = require("path");
 
+const GLOBALS = {
+  mediaFile: "video-960x540-5s.webm"
+};
+
 async function setupPublisherServer(adserverPort) {
   const availablePort = await portfinder.getPortPromise();
 
@@ -57,7 +61,7 @@ async function setupAdvertServer() {
   app.set('views',  path.resolve(".") + '/test/vast');
 
   app.get("/vast", (req, res) => {
-    res.type('xml').render('sample01', { port: availablePort })
+    res.type('xml').render('sample01', { port: availablePort, mediaFile: GLOBALS.mediaFile })
   });
 
   app.get("/track/*", (req, res) => {
@@ -76,7 +80,6 @@ async function setupAdvertServer() {
   });
 }
 
-
 describe('Video player', () => {
   let pubPort;
   let adPort;
@@ -84,40 +87,59 @@ describe('Video player', () => {
   let adserver;
 
   beforeAll(async () => {
-
     adserver = await setupAdvertServer();
     adPort = adserver.address().port;
 
     pubserver = await setupPublisherServer(adPort);
     pubPort = pubserver.address().port;
-
-    // page.on('request', (req) => {
-    //   console.log(req.url());
-    // });
-
-    await page.goto(`http://localhost:${pubPort}/index.html`);
-
     jest.setTimeout(10000);
   });
-
 
   afterAll(() => {
     adserver.close();
     pubserver.close();
   });
 
-
-  it('should play preroll', async () => {
-
-    await page.waitForSelector('video');
-
-    await page.waitForSelector('div.vjs-poster');
-
-    await page.click('video');
-
-    await page.waitForSelector('video[src*="video-960x540-5s"]');
-
-    expect(await page.$eval('video', el => el.getAttribute("src"))).toMatch("video-960x540-5s");
+  beforeEach(async () => {
+    GLOBALS.mediaFile = "video-960x540-5s.webm";
+    await page.goto(`http://localhost:${pubPort}/index.html`);
   });
 
+  it('should play preroll', async () => {
+    await waitForVideo();
+
+    await clickVideo();
+
+    await page.waitForFunction('window.test.playedSources.length > 1');
+
+    const result = await page.evaluate(() => window.test.playedSources);
+
+    expect(result.length).toEqual(2);
+    expect(result[0]).toMatch("video-960x540-5s");
+    expect(result[1]).toMatch("big_buck_bunny_720p_surround");
+  });
+
+  it('should play content video when media file does not exist', async () => {
+    GLOBALS.mediaFile = "no-such-file-exists";
+
+    await waitForVideo();
+
+    await clickVideo();
+
+    await page.waitFor(() => window.test.playedSources.length > 0, {timeout: 3000});
+
+    const result = await page.evaluate(() => window.test.playedSources);
+
+    expect(result.length).toEqual(1);
+    expect(result[0]).toMatch("big_buck_bunny_720p_surround");
+  });
+
+  async function waitForVideo() {
+    await page.waitForSelector('video');
+    await page.waitForSelector('div.vjs-poster');
+  }
+
+  async function clickVideo() {
+    await page.click('video');
+  }
 });

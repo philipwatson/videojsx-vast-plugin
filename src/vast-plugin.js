@@ -32,6 +32,7 @@ export default class VastPlugin extends Plugin {
     this.domElements = {};
 
     player.one('play', () => {
+      player.error(null);
       this._getVastContent(options.url);
     });
 
@@ -242,11 +243,9 @@ export default class VastPlugin extends Plugin {
       const MEDIAFILE_PLAYBACK_ERROR = '405';
       tracker.errorWithCode(MEDIAFILE_PLAYBACK_ERROR);
       errorOccurred = true;
-      if (this.eventListeners.tearDown) {
-        this.eventListeners.teardown();
-      }
-
-      // ?? player.trigger('ended');
+      // Do not want to show VAST related errors to the user
+      player.error(null);
+      player.trigger('adended');
     };
 
     const fullScreenFn = function() {
