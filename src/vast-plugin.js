@@ -57,7 +57,7 @@ export default class VastPlugin extends Plugin {
     this.vastClient.get(url, {withCredentials: options.withCredentials, wrapperLimit: options.wrapperLimit})
       .then(res => {
 
-        if (res.ads === undefined || res.ads.length === 0) {
+        if (!res.ads) {
           this.player.trigger('adscanceled');
           return;
         }
@@ -71,7 +71,7 @@ export default class VastPlugin extends Plugin {
 
         const companionCreative = adWithLinear.creatives.find(companionFn);
 
-        if (options.companion && companionCreative !== undefined) {
+        if (options.companion && companionCreative) {
           const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
           if (variation) {
             if (variation.staticResource) {
