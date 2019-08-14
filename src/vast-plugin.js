@@ -57,7 +57,7 @@ export default class VastPlugin extends Plugin {
     this.vastClient.get(url, {withCredentials: options.withCredentials, wrapperLimit: options.wrapperLimit})
       .then(res => {
 
-        if (!res.ads) {
+        if (!res.ads || res.ads.length === 0) {
           this.player.trigger('adscanceled');
           return;
         }
