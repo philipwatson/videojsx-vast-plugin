@@ -71,7 +71,7 @@ export default class VastPlugin extends Plugin {
 
         const companionCreative = adWithLinear.creatives.find(companionFn);
 
-        if (options.companion) {
+        if (options.companion && companionCreative !== undefined) {
           const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
           if (variation) {
             if (variation.staticResource) {
