@@ -1,6 +1,9 @@
-* Companion ad support
 * AdPod support - is it possible with contrib-ads plugin?
 * Load vast earlier on if(player.currentSrc())?
 * Handle case when video src has been changed
 * Report to server (specified in vast xml?) when no suitable file can be played?
 * Execute non-linear ad events (click, view, etc)
+* Support case when no video src is provided (only show preroll)
+* Support replay advert (and reply video content?). Triggered by user.
+* Handle case when user has companion config setup but no companion ad on VAST response
+* README.md
