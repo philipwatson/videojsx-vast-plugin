@@ -17,57 +17,57 @@
                         <Duration>00:00:05</Duration>
                         <TrackingEvents>
                             <Tracking event="creativeView">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=creativeView]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=creativeView]]>
                             </Tracking>
                             <Tracking event="start">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=start]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=start]]>
                             </Tracking>
                             <Tracking event="firstQuartile">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=firstQuartile]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=firstQuartile]]>
                             </Tracking>
                             <Tracking event="midpoint">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=midpoint]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=midpoint]]>
                             </Tracking>
                             <Tracking event="thirdQuartile">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=thirdQuartile]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=thirdQuartile]]>
                             </Tracking>
                             <Tracking event="complete">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=complete]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=complete]]>
                             </Tracking>
                             <Tracking event="mute">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=mute]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=mute]]>
                             </Tracking>
                             <Tracking event="unmute">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=unmute]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=unmute]]>
                             </Tracking>
                             <Tracking event="pause">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=pause]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=pause]]>
                             </Tracking>
                             <Tracking event="resume">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=resume]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=resume]]>
                             </Tracking>
                             <Tracking event="fullscreen">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=fullscreen]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=fullscreen]]>
                             </Tracking>
                             <Tracking event="skip">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=skip]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=skip]]>
                             </Tracking>
                             <Tracking event="close">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=close]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=close]]>
                             </Tracking>
                         </TrackingEvents>
                         <VideoClicks>
                             <ClickThrough>
-                                <![CDATA[http://localhost:8080/landing-page.html]]>
+                                <![CDATA[http://localhost:9999/landing-page.html]]>
                             </ClickThrough>
                             <ClickTracking id="Partner100">
-                                <![CDATA[http://localhost:8080/pixel1x1.gif?track=clickTracking]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=clickTracking]]>
                             </ClickTracking>
                         </VideoClicks>
                         <MediaFiles>
                             <MediaFile delivery="progressive" type="video/mp4" bitrate="400" width="640" height="360"
                                        scalable="true" maintainAspectRatio="true">
-                                <![CDATA[http://localhost:8080/video-960x540-5s.mp4]]>
+                                <![CDATA[http://localhost:9999/video-960x540-5s.mp4]]>
                             </MediaFile>
                         </MediaFiles>
                     </Linear>
@@ -76,15 +76,15 @@
                     <CompanionAds required="none">
                         <Companion width="300" height="250">
                             <StaticResource creativeType="image/jpeg">
-                                <![CDATA[http://localhost:8080/image-300x250.jpg]]>
+                                <![CDATA[http://localhost:9999/image-300x250.jpg]]>
                             </StaticResource>
                             <TrackingEvents>
                                 <Tracking event="creativeView">
-                                    <![CDATA[http://localhost:8080/pixel1x1.gif?id=creativeView]]>
+                                    <![CDATA[http://localhost:9999/pixel1x1.gif?id=creativeView]]>
                                 </Tracking>
                             </TrackingEvents>
                             <CompanionClickThrough>
-                                <![CDATA[http://localhost:8080/landing-page.html]]>
+                                <![CDATA[http://localhost:9999/landing-page.html]]>
                             </CompanionClickThrough>
                         </Companion>
                     </CompanionAds>

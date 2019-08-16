@@ -1,4 +1,6 @@
-module.exports = {
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+
+const videoPlayerConfig = {
     entry: {player: './src/vast-player.js'},
 
     output: {
@@ -20,3 +22,24 @@ module.exports = {
         extensions: ['.js'],
     },
 };
+
+const standalonePluginConfig = Object.assign({}, videoPlayerConfig, {
+    entry: {
+        'videojsx.vast': ['./src/vast-plugin.js', './src/vast-player.css']
+    },
+    externals: {
+        'video.js': 'videojs'
+    },
+    module: {
+        rules: [
+            { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
+            { test: /\.css?$/, exclude: /node_modules/, use: [MiniCssExtractPlugin.loader, 'css-loader'] },
+        ],
+    },
+    plugins: [
+      new MiniCssExtractPlugin()
+    ]
+
+});
+
+module.exports = [videoPlayerConfig, standalonePluginConfig];

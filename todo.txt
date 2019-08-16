@@ -5,5 +5,4 @@
 * Execute non-linear ad events (click, view, etc)
 * Support case when no video src is provided (only show preroll)
 * Support replay advert (and reply video content?). Triggered by user.
-* Handle case when user has companion config setup but no companion ad on VAST response
 * README.md

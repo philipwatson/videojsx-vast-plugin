@@ -1,9 +1,9 @@
 import '!style-loader!css-loader!video.js/dist/video-js.css';
 import '!style-loader!css-loader!vast-player.css';
 
-import VastPlugin from 'vast-plugin';
 import videojs from 'video.js';
+import 'videojs-contrib-ads'; // Contrib Ads plugin registers itself
+import  'vast-plugin';
 
-videojs.registerPlugin('vast', VastPlugin);
 
 window.videojs = videojs;

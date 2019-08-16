@@ -1,5 +1,4 @@
 import videojs from 'video.js';
-import 'videojs-contrib-ads'; // Contrib Ads plugin registers itself
 import { VASTClient, VASTTracker } from 'vast-client'
 
 
@@ -16,11 +15,14 @@ const defaultOptions = {
   withCredentials: true
 };
 
-export default class VastPlugin extends Plugin {
+class VastPlugin extends Plugin {
   constructor(player, options) {
     super(player);
 
-    player.ads({debug:true});
+    // Could be initialized already by user
+    if (typeof player.ads === 'function') {
+      player.ads({debug: false});
+    }
 
     options = videojs.mergeOptions(defaultOptions, options || {});
 
@@ -164,6 +166,7 @@ export default class VastPlugin extends Plugin {
         skipButton.style.display = 'block';
         player.on('adtimeupdate', this.eventListeners.adtimeupdate);
       }
+      this.player.loadingSpinner.el().style.display = 'none';
     });
 
     this.eventListeners.teardown = () => this._tearDown();
@@ -258,7 +261,7 @@ export default class VastPlugin extends Plugin {
       tracker.setFullscreen(player.isFullscreen());
     };
 
-    const muteFn = (function(){
+    const muteFn = (function() {
       let previousMuted = player.muted();
       let previousVolume = player.volume();
 
@@ -305,3 +308,5 @@ export default class VastPlugin extends Plugin {
     });
   }
 }
+
+videojs.registerPlugin('vast', VastPlugin);
