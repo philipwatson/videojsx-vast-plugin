@@ -3,10 +3,18 @@
   "version": "1.0.0",
   "description": "HTML5 video player with VAST support",
   "main": "dist/player.js",
+  "vjsstandard": {
+    "ignore": [
+      "dist",
+      "test",
+      "config",
+      "/*.js"
+    ]
+  },
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "clean": "rm -rf dist",
-    "lint": "",
+    "lint": "vjsstandard",
     "start": "webpack-dev-server --config webpack.dev.js",
     "test": "jest",
     "watch": "webpack --config webpack.watch.js"
@@ -41,6 +49,7 @@
     "portfinder": "^1.0.20",
     "puppeteer": "^1.14.0",
     "style-loader": "^0.23.0",
+    "videojs-standard": "^8.0.3",
     "webpack": "^4.12.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.14",
