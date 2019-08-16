@@ -1,4 +1,4 @@
-#videojsx-vast-plugin
+# videojsx-vast-plugin
 
 
 Initially, the code was taken from [videojs-vast-plugin](https://github.com/theonion/videojs-vast-plugin) and made it work with videojs 7.
@@ -86,7 +86,7 @@ Example:
 
 | Name             | Optional | default              | Description |
 | ---------------- | ---------|----------------------| ----------- |
-| `url`              | No       | n/a   | URL that responds with a VAST document| 
+| `url`              | No       | n/a     | URL that responds with a VAST document| 
 | `seekEnabled`      | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.|          
 | `controlsEnabled`  | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing|          
 | `wrapperLimit`     | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed|          
@@ -97,9 +97,9 @@ Example:
 ##### Companion Options
 | Name             | Optional | default              | Description |
 | ---------------- | ---------|----------------------| ----------- |
-| `elementId`        | Yes    | n/a | Id of the HTML element that will serve as the creative container| 
-| `maxWidth`         | Yes    | n/a | The maximum width allowed for the creative | 
-| `maxHeight`        | Yes    | n/a | The maximum height allowed for the creative| 
+| `elementId`        | No    | n/a | Id of the HTML element that will serve as the creative container| 
+| `maxWidth`         | No    | n/a | The maximum width allowed for the creative | 
+| `maxHeight`        | No    | n/a | The maximum height allowed for the creative| 
 
 
 ## Dev Workflow
