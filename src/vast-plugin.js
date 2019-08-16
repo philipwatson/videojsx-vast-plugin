@@ -12,7 +12,8 @@ const defaultOptions = {
   seekEnabled: false,
   controlsEnabled: false,
   wrapperLimit: 10,
-  withCredentials: true
+  withCredentials: true,
+  skip: 0
 };
 
 class VastPlugin extends Plugin {
