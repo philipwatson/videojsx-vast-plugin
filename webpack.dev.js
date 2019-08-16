@@ -6,7 +6,7 @@ module.exports = common.map(c => merge(c, {
   devtool: 'inline-source-map',
   devServer: {
     contentBase: ['./dist', './dev', './test/creative'],
-    openPage: 'player.html.html',
+    openPage: 'index.html',
     open: true,
     port: 9999
   }
