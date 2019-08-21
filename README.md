@@ -32,7 +32,7 @@ Ordering does matter. Be sure you request `video.js` first and `videojs-contrib-
 
 It will look something like this:
 
-```
+```html
 <head>
     <!-- video.js framework -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.2.3/video-js.min.css" rel="stylesheet">
@@ -52,7 +52,7 @@ It will look something like this:
 
 Put anywhere before you start using it. For example, in the head section:
 
-```
+```html
 <head>
     <script src="http://where-you-host-the-plugin.com/player.js"></script>
 </head>
@@ -62,7 +62,7 @@ Put anywhere before you start using it. For example, in the head section:
 ### General Use
 
 Example:
-```
+```html
 <video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="your-poster.jpg">
   <source id ="mysrc" src="your-content.mp4" type="video/mp4">
   Your browser does not support video.
@@ -84,7 +84,7 @@ Example:
 
 #### Options
 
-| Name             | Optional | default              | Description |
+| Name             | Optional | Default              | Description |
 | ---------------- | ---------|----------------------| ----------- |
 | `url`              | No       | n/a     | URL that responds with a VAST document| 
 | `seekEnabled`      | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.|          
@@ -92,15 +92,25 @@ Example:
 | `wrapperLimit`     | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed|          
 | `withCredentials`  | Yes      | `true`  | Enable third-party cookies on the VAST request|
 | `skip`             | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped|  
-| `companion`        | Yes      | `{}`    | See companion options below | 
+| `companion`        | Yes      | `{}`    | See Companion options below | 
+| `vpaid`            | Yes      | `{}`    | See VPAID options below | 
 
 ##### Companion Options
-| Name             | Optional | default              | Description |
-| ---------------- | ---------|----------------------| ----------- |
-| `elementId`        | No    | n/a | Id of the HTML element that will serve as the creative container| 
-| `maxWidth`         | No    | n/a | The maximum width allowed for the creative | 
-| `maxHeight`        | No    | n/a | The maximum height allowed for the creative| 
 
+| Name          | Optional | Default              | Description |
+| ------------- | -------- |----------------------| ----------- |
+| `elementId`   | No       | n/a | Id of the HTML element that will serve as the creative container| 
+| `maxWidth`    | No       | n/a | The maximum width allowed for the creative | 
+| `maxHeight`   | No       | n/a | The maximum height allowed for the creative| 
+
+
+##### VPAID Options
+
+| Name             | Optional | Default               | Description |
+| ---------------- | ---------|---------------------- | ----------- |
+| `videoInstance`  | Yes      |`'none'`               | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
+| `containerId`    | Yes      |`undefined`            | The id of the container. Usage is not recommended.  | 
+| `containerClass` | Yes      |`'vjs-vpaid-container'`| The class name of the container. Usage is not recommended.| 
 
 ## Dev Workflow
 
@@ -124,3 +134,4 @@ Experimental
 * The [Video.js Framework](http://videojs.com/) itself
 * Video.js's [Ad plugin](https://github.com/videojs/videojs-contrib-ads) allowing video ad integration (switching between content and pre-roll)
 * Dailymotion's [VAST client](https://github.com/dailymotion/vast-client-js) to parse and read VAST content
+* MailOnline's [VPAIDHTMLClient](https://github.com/MailOnline/VPAIDHTML5Client). A JavaScript iframe wrapper for VPAID

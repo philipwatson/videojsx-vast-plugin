@@ -1,5 +1,6 @@
 import videojs from 'video.js';
 import { VASTClient, VASTTracker } from 'vast-client';
+import handleVPAID from 'vpaid-handler'
 
 const Plugin = videojs.getPlugin('plugin');
 
@@ -13,6 +14,22 @@ function createSourceObjects(mediaFiles) {
   return mediaFiles.map(mediaFile => ({type: mediaFile.mimeType, src: mediaFile.fileURL}));
 }
 
+/**
+ * Determine if the VAST creative has a VPAID media file
+ *
+ * @param {object} vastCreative
+ * @returns {boolean}
+ */
+function hasVPAID(vastCreative) {
+  const mediaFiles = vastCreative.mediaFiles;
+  for (let i = 0; i < mediaFiles.length; i++) {
+    if (mediaFiles[i].apiFramework && mediaFiles[i].apiFramework === 'VPAID') {
+      return true;
+    }
+  }
+  return false;
+}
+
 // eslint-disable-next-line no-undef
 const window$ = window;
 
@@ -21,13 +38,19 @@ const defaultOptions = {
   controlsEnabled: false,
   wrapperLimit: 10,
   withCredentials: true,
-  skip: 0
+  skip: 0,
+  vpaid: {
+    containerId: undefined,
+    containerClass: 'vjs-vpaid-container',
+    videoInstance: 'none'
+  }
 };
 
 /**
  * VastPlugin
  */
 class VastPlugin extends Plugin {
+
   /**
    * Constructor
    *
@@ -50,11 +73,7 @@ class VastPlugin extends Plugin {
     this.originalPlayerState = {};
     this.eventListeners = {};
     this.domElements = {};
-
-    player.one('play', () => {
-      player.error(null);
-      this._getVastContent(options.url);
-    });
+    this.vastCreative = null;
 
     player.on('contentchanged', () => {
       // eslint-disable-next-line no-console
@@ -62,13 +81,23 @@ class VastPlugin extends Plugin {
     });
 
     player.on('readyforpreroll', () => {
-      if (!options.url) {
-        player.trigger('adscanceled');
-        return;
-      }
+      console.log('Trigger read for preroll');
 
-      this._doPreroll();
+      if (hasVPAID(this.vastCreative)) {
+        handleVPAID(player, this.vastCreative, options)
+      }
+      else {
+        this._doPreroll(this.vastCreative);
+      }
     });
+
+    if (!options.url) {
+      player.trigger('adscanceled');
+      return;
+    }
+
+    // player.error(null);
+    this._getVastContent(options.url);
 
   }
 
@@ -125,19 +154,19 @@ class VastPlugin extends Plugin {
           }
         }
 
-        // console.log("RESULT: " + JSON.stringify(companionCreative));
-
-        this.sources = createSourceObjects(linearCreative.mediaFiles);
-
         this.tracker = new VASTTracker(this.vastClient, adWithLinear, linearCreative, companionCreative);
 
-        if (this.sources.length) {
+        this.vastCreative = linearCreative;
+
+        if (linearCreative.mediaFiles.length) {
+          console.log('Trigger ads ready');
           this.player.trigger('adsready');
         } else {
           this.player.trigger('adscanceled');
         }
       })
       .catch(err => {
+        console.log('Trigger ads cancelled');
         this.player.trigger('adscanceled');
         // eslint-disable-next-line no-console
         console.error(err);
@@ -149,7 +178,7 @@ class VastPlugin extends Plugin {
    *
    * @private
    */
-  _doPreroll() {
+  _doPreroll(vastCreative) {
     const player = this.player;
     const options = this.options;
 
@@ -165,7 +194,7 @@ class VastPlugin extends Plugin {
       player.controlBar.progressControl.disable();
     }
 
-    player.src(this.sources);
+    player.src(createSourceObjects(vastCreative.mediaFiles));
 
     const blocker = window$.document.createElement('div');
 
