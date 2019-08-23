@@ -48,7 +48,7 @@ export default function handleVPAID(player, vastCreative, options) {
     let videoElement;
 
     function onHandShake(error, result) {
-      const initialDimensions = getPlayerDimensions();
+      const initialDimensions = getPlayerDimensions(player);
 
       const creativeData = {
         AdParameters: vastCreative.adParameters
@@ -100,14 +100,14 @@ export default function handleVPAID(player, vastCreative, options) {
     }
 
     function resizeAd() {
-      const newDimensions = getPlayerDimensions();
+      const newDimensions = getPlayerDimensions(player);
 
       adUnit.resizeAd(newDimensions.width, newDimensions.height, player.isFullscreen() ? 'fullscreen' : 'normal');
     }
   }
 }
 
-function getPlayerDimensions() {
+function getPlayerDimensions(player) {
   let width = player.width();
   let height = player.height();
 
