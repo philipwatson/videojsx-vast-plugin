@@ -84,9 +84,10 @@ Example:
 
 #### Options
 
-| Name             | Optional | Default              | Description |
-| ---------------- | ---------|----------------------| ----------- |
-| `url`              | No       | n/a     | URL that responds with a VAST document| 
+| Name               | Optional | Default | Description |
+| ------------------ | -------- |---------| ----------- |
+| `url`              | Yes      | n/a     | URL that responds with a VAST document| 
+| `xml`              | Yes      | n/a     | The VAST document. Use as an alternative to `url`. Can be a String or XMLDocument.| 
 | `seekEnabled`      | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.|          
 | `controlsEnabled`  | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing|          
 | `wrapperLimit`     | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed|          

@@ -1,5 +1,5 @@
-import videojs from 'video.js';
-import { VASTClient, VASTTracker } from 'vast-client';
+import videojs from 'video.js'
+import { VASTClient, VASTParser, VASTTracker } from 'vast-client'
 import handleVPAID from 'vpaid-handler'
 
 const Plugin = videojs.getPlugin('plugin');
@@ -91,86 +91,101 @@ class VastPlugin extends Plugin {
       }
     });
 
-    if (!options.url) {
-      player.trigger('adscanceled');
+    this._getVastContent()
+      .then((res) => this._handleVast(res))
+      .catch(err => {
+        this.player.trigger('adscanceled');
+        // eslint-disable-next-line no-console
+        console.log(`Ad cancelled: ${err.message}`);
+      });
+  }
+
+  _handleVast(vast) {
+    if (!vast.ads || vast.ads.length === 0) {
+      this.player.trigger('adscanceled');
       return;
     }
 
-    // player.error(null);
-    this._getVastContent(options.url);
+    const linearFn = creative => creative.type === 'linear';
+    const companionFn = creative => creative.type === 'companion';
 
+    const adWithLinear = vast.ads.find(ad => ad.creatives.some(linearFn));
+
+    const linearCreative = adWithLinear.creatives.find(linearFn);
+
+    const companionCreative = adWithLinear.creatives.find(companionFn);
+
+    const options = this.options;
+
+    if (options.companion && companionCreative) {
+      const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
+
+      if (variation) {
+        if (variation.staticResource) {
+          if (variation.type.indexOf('image') === 0) {
+            const clickThroughUrl = variation.companionClickThroughURLTemplate;
+
+            const dest = window$.document.getElementById(options.companion.elementId);
+
+            let html;
+
+            if (clickThroughUrl) {
+              html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`;
+            } else {
+              html = `<img src="${variation.staticResource}"/>`;
+            }
+            dest.innerHTML = html;
+          } else if (['application/x-javascript', 'text/javascript', 'application/javascript'].indexOf(variation.type) > -1) {
+            // handle script
+          } else if (variation.type === 'application/x-shockwave-flash') {
+            // handle flash
+          }
+        }
+      }
+    }
+
+    this.tracker = new VASTTracker(this.vastClient, adWithLinear, linearCreative, companionCreative);
+
+    this.vastCreative = linearCreative;
+
+    if (linearCreative.mediaFiles.length) {
+      console.log('Trigger ads ready');
+      this.player.trigger('adsready');
+    } else {
+      this.player.trigger('adscanceled');
+    }
   }
 
   /**
    * Get Vast Content
    *
-   * @param {string} url The VAST url
    * @private
    */
-  _getVastContent(url) {
-    const options = this.options;
+  _getVastContent() {
+    let {url, xml} = this.options;
 
-    this.vastClient.get(url, {withCredentials: options.withCredentials, wrapperLimit: options.wrapperLimit})
-      .then(res => {
+    if (url) {
+      return this.vastClient.get(url, {withCredentials: this.options.withCredentials, wrapperLimit: this.options.wrapperLimit});
+    }
+    else if (xml) {
+      const vastParser = new VASTParser();
 
-        if (!res.ads || res.ads.length === 0) {
-          this.player.trigger('adscanceled');
-          return;
-        }
+      let xmlDocument;
+      if (xml.constructor === window.XMLDocument) {
+        xmlDocument = xml;
+      }
+      else if (xml.constructor === String) {
+        xmlDocument = (new window.DOMParser()).parseFromString(xml, 'text/xml');
+      }
+      else {
+        throw new Error('xml config option must be a String or XMLDocument');
+      }
 
-        const linearFn = creative => creative.type === 'linear';
-        const companionFn = creative => creative.type === 'companion';
-
-        const adWithLinear = res.ads.find(ad => ad.creatives.some(linearFn));
-
-        const linearCreative = adWithLinear.creatives.find(linearFn);
-
-        const companionCreative = adWithLinear.creatives.find(companionFn);
-
-        if (options.companion && companionCreative) {
-          const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
-
-          if (variation) {
-            if (variation.staticResource) {
-              if (variation.type.indexOf('image') === 0) {
-                const clickThroughUrl = variation.companionClickThroughURLTemplate;
-
-                const dest = window$.document.getElementById(options.companion.elementId);
-
-                let html;
-
-                if (clickThroughUrl) {
-                  html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`;
-                } else {
-                  html = `<img src="${variation.staticResource}"/>`;
-                }
-                dest.innerHTML = html;
-              } else if (['application/x-javascript', 'text/javascript', 'application/javascript'].indexOf(variation.type) > -1) {
-                // handle script
-              } else if (variation.type === 'application/x-shockwave-flash') {
-                // handle flash
-              }
-            }
-          }
-        }
-
-        this.tracker = new VASTTracker(this.vastClient, adWithLinear, linearCreative, companionCreative);
-
-        this.vastCreative = linearCreative;
-
-        if (linearCreative.mediaFiles.length) {
-          console.log('Trigger ads ready');
-          this.player.trigger('adsready');
-        } else {
-          this.player.trigger('adscanceled');
-        }
-      })
-      .catch(err => {
-        console.log('Trigger ads cancelled');
-        this.player.trigger('adscanceled');
-        // eslint-disable-next-line no-console
-        console.error(err);
-      });
+      return vastParser.parseVAST(xmlDocument);
+    }
+    else {
+      return Promise.reject(new Error('url or xml option not set'));
+    }
   }
 
   /**

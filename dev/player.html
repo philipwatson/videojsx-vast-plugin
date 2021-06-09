@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Player Example</title>
 </head>
@@ -19,15 +19,22 @@
 <script>
   var player = videojs('vid1');
 
+
+// language=XML
+var xml = '<VAST version="2.0"><Ad id="Ad"><Wrapper><AdSystem>AdScale</AdSystem><VASTAdTagURI><![CDATA[http://localhost:9999/vast.xml]]></VASTAdTagURI></Wrapper></Ad>\n</VAST>';
+
   var companion = {
     elementId: "companion",
     maxWidth: 300,
     maxHeight: 250
   };
 
-  player.vast({url: 'http://localhost:9999/vast.xml', skip: 8, companion: companion});
+  player.vast({
+    xml: xml,
+    //url: 'http://localhost:9999/vast.xml',
+    skip: 8,
+    companion: companion})
 </script>
 
 </body>
-
 </html>

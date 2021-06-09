@@ -102,10 +102,11 @@ describe('Video player', () => {
 
   beforeEach(async () => {
     GLOBALS.mediaFile = "video-960x540-5s.webm";
-    await page.goto(`http://localhost:${pubPort}/index.html`);
   });
 
   it('should play preroll', async () => {
+    await page.goto(`http://localhost:${pubPort}/index.html`);
+
     await waitForVideo();
 
     await clickVideo();
@@ -121,6 +122,8 @@ describe('Video player', () => {
 
   it('should play content video when media file does not exist', async () => {
     GLOBALS.mediaFile = "no-such-file-exists";
+
+    await page.goto(`http://localhost:${pubPort}/index.html`);
 
     await waitForVideo();
 
