@@ -115,6 +115,24 @@ Example:
 
 ## Dev Workflow
 
+### Setup
+This project uses LFS for versioning large files (e.g., mp4). Only useful for development. 
+Please see [Git Large File Storage](https://git-lfs.github.com/) on github for details.
+
+Example setup for Mac OS:
+```bash
+brew install git-lfs
+git lfs install
+```
+
+If you already cloned this repo before installing LFS and want to get the real content (replace pointer files):
+
+```bash
+git lfs checkout
+git lfs fetch
+```
+
+### Workflow
 Run `npm start` brings up a development server at port 9999 with automatic background builds. 
 
 The page is http://localhost:9999/index.html
