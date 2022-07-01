@@ -9,7 +9,7 @@
                 <![CDATA[ Description ]]>
             </Description>
             <Impression id="Partner100">
-                <![CDATA[http://localhost:{{port}}/track/impression?id=123]]>
+                <![CDATA[http://localhost:9999/pixel1x1.gif?track=impression]]>
             </Impression>
             <Creatives>
                 <Creative AdID="123-Video">
@@ -61,7 +61,7 @@
                                 <![CDATA[http://localhost:9999/landing-page.html]]>
                             </ClickThrough>
                             <ClickTracking id="Partner100">
-                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=clickTracking]]>
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=clickTracking&playhead=[CONTENTPLAYHEAD]]]>
                             </ClickTracking>
                         </VideoClicks>
                         <MediaFiles>
@@ -86,6 +86,9 @@
                             <CompanionClickThrough>
                                 <![CDATA[http://localhost:9999/landing-page.html]]>
                             </CompanionClickThrough>
+                            <CompanionClickTracking id="123">
+                                <![CDATA[[http://localhost:9999/pixel1x1.gif?id=companionClickTracking]]>
+                            </CompanionClickTracking>
                         </Companion>
                     </CompanionAds>
                 </Creative>

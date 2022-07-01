@@ -9,7 +9,7 @@
                 <![CDATA[ Description ]]>
             </Description>
             <Impression id="Partner100">
-                <![CDATA[http://localhost:{{port}}/track/impression?id=123]]>
+                <![CDATA[http://localhost:9999/pixel1x1.gif?track=impression]]>
             </Impression>
             <Creatives>
                 <Creative AdID="123-Video" apiFramework="VPAID">

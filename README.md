@@ -98,11 +98,11 @@ Example:
 
 ##### Companion Options
 
-| Name          | Optional | Default              | Description |
-| ------------- | -------- |----------------------| ----------- |
-| `elementId`   | No       | n/a | Id of the HTML element that will serve as the creative container| 
-| `maxWidth`    | No       | n/a | The maximum width allowed for the creative | 
-| `maxHeight`   | No       | n/a | The maximum height allowed for the creative| 
+| Name          | Optional | Default | Description |
+| ------------- |----------|---------| ----------- |
+| `elementId`   | Yes      | `null`    | Id of the HTML element that will serve as the creative container| 
+| `maxWidth`    | Yes      | `0`       | The maximum width allowed for the creative | 
+| `maxHeight`   | Yes      | `0`       | The maximum height allowed for the creative| 
 
 
 ##### VPAID Options

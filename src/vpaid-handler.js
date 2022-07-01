@@ -1,10 +1,17 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
 
-export default function handleVPAID(player, vastCreative, options) {
+/**
+ *
+ * @param player
+ * @param {VASTTracker} tracker
+ * @param {Object} options
+ */
+export default function handleVPAID(player, tracker, options) {
+  const creative = tracker.creative;
   const validTypes = ['application/x-javascript', 'text/javascript', 'application/javascript'];
   const validMime = mediaFile => validTypes.indexOf(mediaFile.mimeType.trim()) > -1;
 
-  const vpaidMediaFile = vastCreative.mediaFiles.find(mediaFile => mediaFile.apiFramework === 'VPAID' && validMime(mediaFile));
+  const vpaidMediaFile = creative.mediaFiles.find(mediaFile => mediaFile.apiFramework === 'VPAID' && validMime(mediaFile));
 
   if (!vpaidMediaFile) {
     console.warn("Only JavaScript VPAID is supported by this player");
@@ -51,7 +58,7 @@ export default function handleVPAID(player, vastCreative, options) {
       const initialDimensions = getPlayerDimensions(player);
 
       const creativeData = {
-        AdParameters: vastCreative.adParameters
+        AdParameters: creative.adParameters
       };
 
       const videoInstance = options.vpaid.videoInstance;
@@ -84,6 +91,7 @@ export default function handleVPAID(player, vastCreative, options) {
       player.trigger('ads-ad-started');
       player.on('resize', resizeAd);
       window.addEventListener('resize', resizeAd);
+      tracker.trackImpression();
     }
 
     function onAdStopped() {

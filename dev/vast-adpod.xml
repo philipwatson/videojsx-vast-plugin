@@ -1,0 +1,194 @@
+<VAST version="3.0">
+    <Ad id="123" sequence="1">
+        <InLine>
+            <AdSystem>Partner100</AdSystem>
+            <AdTitle>
+                <![CDATA[ Title ]]>
+            </AdTitle>
+            <Description>
+                <![CDATA[ Description ]]>
+            </Description>
+            <Impression id="Partner100">
+                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=impression]]>
+            </Impression>
+            <Creatives>
+                <Creative AdID="123-Video">
+                    <Linear>
+                        <Duration>00:00:06</Duration>
+                        <TrackingEvents>
+                            <Tracking event="creativeView">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=creativeView]]>
+                            </Tracking>
+                            <Tracking event="start">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=start]]>
+                            </Tracking>
+                            <Tracking event="firstQuartile">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=firstQuartile]]>
+                            </Tracking>
+                            <Tracking event="midpoint">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=midpoint]]>
+                            </Tracking>
+                            <Tracking event="thirdQuartile">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=thirdQuartile]]>
+                            </Tracking>
+                            <Tracking event="complete">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=complete]]>
+                            </Tracking>
+                            <Tracking event="mute">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=mute]]>
+                            </Tracking>
+                            <Tracking event="unmute">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=unmute]]>
+                            </Tracking>
+                            <Tracking event="pause">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=pause]]>
+                            </Tracking>
+                            <Tracking event="resume">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=resume]]>
+                            </Tracking>
+                            <Tracking event="fullscreen">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=fullscreen]]>
+                            </Tracking>
+                            <Tracking event="skip">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=skip]]>
+                            </Tracking>
+                            <Tracking event="close">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=close]]>
+                            </Tracking>
+                        </TrackingEvents>
+                        <VideoClicks>
+                            <ClickThrough>
+                                <![CDATA[http://localhost:9999/landing-page.html?ad=ad1]]>
+                            </ClickThrough>
+                            <ClickTracking id="Partner100">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&track=clickTracking&playhead=[CONTENTPLAYHEAD]]]>
+                            </ClickTracking>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile delivery="progressive" type="video/mp4" bitrate="400" width="640" height="360"
+                                       scalable="true" maintainAspectRatio="true">
+                                <![CDATA[http://localhost:9999/video-960x540-6s-sound.mp4]]>
+                            </MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+                <Creative AdID="123-Companions">
+                    <CompanionAds required="none">
+                        <Companion width="745" height="100">
+                            <StaticResource creativeType="image/jpeg">
+                                <![CDATA[http://localhost:9999/image-745x100.gif]]>
+                            </StaticResource>
+                            <TrackingEvents>
+                                <Tracking event="creativeView">
+                                    <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad1&id=creativeView]]>
+                                </Tracking>
+                            </TrackingEvents>
+                            <CompanionClickThrough>
+                                <![CDATA[http://localhost:9999/landing-page.html]]>
+                            </CompanionClickThrough>
+                            <CompanionClickTracking id="123">
+                                <![CDATA[[http://localhost:9999/pixel1x1.gif?ad=ad1&id=companionClickTracking]]>
+                            </CompanionClickTracking>
+                        </Companion>
+                    </CompanionAds>
+                </Creative>
+            </Creatives>
+        </InLine>
+    </Ad>
+    <Ad id="ABC" sequence="2">
+        <InLine>
+            <AdSystem>Partner200</AdSystem>
+            <AdTitle>
+                <![CDATA[ Title ]]>
+            </AdTitle>
+            <Description>
+                <![CDATA[ Description ]]>
+            </Description>
+            <Impression id="Partner200">
+                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=impression]]>
+            </Impression>
+            <Creatives>
+                <Creative AdID="ABC-Video">
+                    <Linear>
+                        <Duration>00:00:09</Duration>
+                        <TrackingEvents>
+                            <Tracking event="creativeView">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=creativeView]]>
+                            </Tracking>
+                            <Tracking event="start">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=start]]>
+                            </Tracking>
+                            <Tracking event="firstQuartile">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=firstQuartile]]>
+                            </Tracking>
+                            <Tracking event="midpoint">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=midpoint]]>
+                            </Tracking>
+                            <Tracking event="thirdQuartile">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=thirdQuartile]]>
+                            </Tracking>
+                            <Tracking event="complete">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=complete]]>
+                            </Tracking>
+                            <Tracking event="mute">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=mute]]>
+                            </Tracking>
+                            <Tracking event="unmute">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=unmute]]>
+                            </Tracking>
+                            <Tracking event="pause">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=pause]]>
+                            </Tracking>
+                            <Tracking event="resume">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=resume]]>
+                            </Tracking>
+                            <Tracking event="fullscreen">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=fullscreen]]>
+                            </Tracking>
+                            <Tracking event="skip">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=skip]]>
+                            </Tracking>
+                            <Tracking event="close">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=close]]>
+                            </Tracking>
+                        </TrackingEvents>
+                        <VideoClicks>
+                            <ClickThrough>
+                                <![CDATA[http://localhost:9999/landing-page.html?ad=ad2]]>
+                            </ClickThrough>
+                            <ClickTracking id="Partner100">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&track=clickTracking&playhead=[CONTENTPLAYHEAD]]]>
+                            </ClickTracking>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile delivery="progressive" type="video/mp4" bitrate="400" width="640" height="360"
+                                       scalable="true" maintainAspectRatio="true">
+                                <![CDATA[http://localhost:9999/video-960x540-9s-sound.mp4]]>
+                            </MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+                <Creative AdID="123-Companions">
+                    <CompanionAds required="none">
+                        <Companion width="200" height="600">
+                            <StaticResource creativeType="image/jpeg">
+                                <![CDATA[http://localhost:9999/image-200x600.webp]]>
+                            </StaticResource>
+                            <TrackingEvents>
+                                <Tracking event="creativeView">
+                                    <![CDATA[http://localhost:9999/pixel1x1.gif?ad=ad2&id=creativeView]]>
+                                </Tracking>
+                            </TrackingEvents>
+                            <CompanionClickThrough>
+                                <![CDATA[http://localhost:9999/landing-page.html]]>
+                            </CompanionClickThrough>
+                            <CompanionClickTracking id="123">
+                                <![CDATA[[http://localhost:9999/pixel1x1.gif?ad=ad2&id=companionClickTracking]]>
+                            </CompanionClickTracking>
+                        </Companion>
+                    </CompanionAds>
+                </Creative>
+            </Creatives>
+        </InLine>
+    </Ad>
+</VAST>

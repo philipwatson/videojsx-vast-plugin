@@ -1,13 +1,14 @@
 import videojs from 'video.js'
-import { VASTClient, VASTParser, VASTTracker } from 'vast-client'
+import {VASTClient, VASTParser, VASTTracker} from 'vast-client'
 import handleVPAID from 'vpaid-handler'
+import {CreativeLinear} from "vast-client/src/creative/creative_linear";
 
 const Plugin = videojs.getPlugin('plugin');
 
 /**
  * Create Source Objects
  *
- * @param {Array} mediaFiles  Array of media files
+ * @param {Array<MediaFile>} mediaFiles  Array of media files
  * @return {Array} Array of source objects
  */
 function createSourceObjects(mediaFiles) {
@@ -17,11 +18,11 @@ function createSourceObjects(mediaFiles) {
 /**
  * Determine if the VAST creative has a VPAID media file
  *
- * @param {object} vastCreative
+ * @param {CreativeLinear} creative
  * @returns {boolean}
  */
-function hasVPAID(vastCreative) {
-  const mediaFiles = vastCreative.mediaFiles;
+function hasVPAID(creative) {
+  const mediaFiles = creative.mediaFiles;
   for (let i = 0; i < mediaFiles.length; i++) {
     if (mediaFiles[i].apiFramework && mediaFiles[i].apiFramework === 'VPAID') {
       return true;
@@ -30,8 +31,70 @@ function hasVPAID(vastCreative) {
   return false;
 }
 
-// eslint-disable-next-line no-undef
-const window$ = window;
+/**
+ *
+ * @param {Ad} ad
+ * @returns {boolean}
+ */
+function doAllLinearCreativesRequireApiFramework(ad) {
+  return ad.creatives
+    .every(creative => doesCreativeRequireApiFramework(creative));
+}
+
+/**
+ *
+ * @param {CreativeLinear} creative
+ * @returns {boolean}
+ */
+function doesCreativeRequireApiFramework(creative) {
+  return creative.mediaFiles.every(mediaFile => mediaFile && mediaFile.apiFramework);
+}
+
+/***
+ *
+ * @param {HTMLElement} skipButtonElement
+ */
+const isSkipEnabled = (skipButtonElement) => (' ' + skipButtonElement.className + ' ').indexOf(' enabled ') > -1;
+
+/***
+ *
+ * @param {HTMLElement} skipButtonElement
+ */
+const enableSkip = (skipButtonElement) => {
+  if (!isSkipEnabled(skipButtonElement)) {
+    skipButtonElement.className += ' enabled ';
+  }
+}
+
+/***
+ *
+ * @param {HTMLElement} skipButtonElement
+ */
+const disableSkip = (skipButtonElement) => {
+  if (isSkipEnabled(skipButtonElement)) {
+    skipButtonElement.className =
+      skipButtonElement.className.replace(' enabled ', '');
+  }
+}
+
+const linearFn = creative => creative.type === 'linear' && creative.mediaFiles.length;
+const companionFn = creative => creative.type === 'companion';
+
+/**
+ * Holds related trackers together.
+ * And from a tracker, we can access the ad, creative and variation.
+ */
+class GroupedTrackers {
+  /**
+   *
+   * @param {VASTTracker} linearAdTracker
+   * @param {VASTTracker} companionTracker
+   */
+  constructor(linearAdTracker, companionTracker) {
+    this.linearAdTracker = linearAdTracker;
+    this.companionTracker = companionTracker;
+  }
+}
 
 const defaultOptions = {
   seekEnabled: false,
@@ -43,6 +106,11 @@ const defaultOptions = {
     containerId: undefined,
     containerClass: 'vjs-vpaid-container',
     videoInstance: 'none'
+  },
+  companion: {
+    elementId: null,
+    maxWidth: 0,
+    maxHeight: 0
   }
 };
 
@@ -65,30 +133,46 @@ class VastPlugin extends Plugin {
       player.ads({debug: false});
     }
 
-    options = videojs.mergeOptions(defaultOptions, options || {});
-
-    this.options = options;
-
+    /** @type {Object} */
+    this.options = videojs.mergeOptions(defaultOptions, options || {});
+    /** @type {VASTClient} */
     this.vastClient = new VASTClient();
+    /** @type {Object} */
     this.originalPlayerState = {};
+    /** @type {Object.<string, function>} */
     this.eventListeners = {};
-    this.domElements = {};
-    this.vastCreative = null;
-
-    player.on('contentchanged', () => {
-      // eslint-disable-next-line no-console
-      console.log('Content changed');
-    });
+    /** @type {Object.<string, HTMLElement>} */
+    this.domElements = {}
+    /** @type {GroupedTrackers[]} */
+    this.trackers = [];
+    /** @type {GroupedTrackers|null} */
+    this.tracker = null;
 
     player.on('readyforpreroll', () => {
-      console.log('Trigger read for preroll');
+      console.log('Trigger ready for preroll');
+      const trackers = this.trackers;
 
-      if (hasVPAID(this.vastCreative)) {
-        handleVPAID(player, this.vastCreative, options)
+      if (trackers.length === 1) {
+        const linearAdTracker = trackers[0].linearAdTracker;
+        const creative = linearAdTracker.creative
+        if (creative instanceof CreativeLinear) {
+          if (doesCreativeRequireApiFramework(creative)) {
+            if (hasVPAID(creative)) {
+              handleVPAID(player, linearAdTracker, videojs.mergeOptions(defaultOptions, options || {}));
+              return;
+            }
+            else {
+              this.player.trigger('adscanceled');
+              return;
+            }
+          }
+        }
+        else {
+          this.player.trigger('adscanceled');
+          return;
+        }
       }
-      else {
-        this._doPreroll(this.vastCreative);
-      }
+      this._startPreroll();
     });
 
     this._getVastContent()
@@ -100,65 +184,115 @@ class VastPlugin extends Plugin {
       });
   }
 
-  _handleVast(vast) {
-    if (!vast.ads || vast.ads.length === 0) {
+  /**
+   *
+   * @param {VASTResponse} vastResponse
+   * @private
+   */
+  _handleVast(vastResponse) {
+    if (!vastResponse.ads || vastResponse.ads.length === 0) {
       this.player.trigger('adscanceled');
       return;
     }
 
-    const linearFn = creative => creative.type === 'linear';
-    const companionFn = creative => creative.type === 'companion';
+    const adsWithLinear = vastResponse.ads
+      .filter(ad => ad.creatives.some(linearFn));
 
-    const adWithLinear = vast.ads.find(ad => ad.creatives.some(linearFn));
+    if (!adsWithLinear.length) {
+      this.player.trigger('adscanceled');
+      return;
+    }
 
-    const linearCreative = adWithLinear.creatives.find(linearFn);
+    const adPod = adsWithLinear
+      .filter(ad => ad.sequence)
+      // TODO: support VPAID in ad pods?
+      .filter(ad => !doAllLinearCreativesRequireApiFramework(ad))
+      .sort((ad1, ad2) => ad1.sequence - ad2.sequence);
 
-    const companionCreative = adWithLinear.creatives.find(companionFn);
+    const standaloneAds = adsWithLinear.filter(ad => !adPod.includes(ad))
 
-    const options = this.options;
+    if (adPod.length) {
+      this.trackers = adPod.map(ad => this._createGroupedTrackers(ad));
+    }
+    else {
+      const [ad] = standaloneAds;
+      this.trackers = [this._createGroupedTrackers(ad)];
+    }
 
-    if (options.companion && companionCreative) {
-      const variation = companionCreative.variations.find(v => v.width === String(options.companion.maxWidth) && v.height === String(options.companion.maxHeight));
+    console.log('Trigger ads ready');
+    this.player.trigger('adsready');
+  }
 
+  /**
+   *
+   * @param {Ad} ad
+   * @returns {GroupedTrackers}
+   * @private
+   */
+  _createGroupedTrackers(ad) {
+    const onClickThrough = (url) => {
+      window.open(url, '_blank');
+    };
+
+    const linearAdTracker =
+      new VASTTracker(this.vastClient, ad, ad.creatives.find(linearFn), ad.creatives.find(companionFn));
+    linearAdTracker.on('clickthrough', onClickThrough);
+
+    let companionAdTracker = null;
+    const companionCreative = ad.creatives.find(companionFn);
+    if (companionCreative) {
+      // Just pick the first suitable companion ad for now
+      const options = this.options;
+      const variation = companionCreative.variations
+        .filter(v => v.staticResource)
+        .filter(v => v.type.indexOf('image') === 0)
+        .find(v => parseInt(v.width) <= options.companion.maxWidth && parseInt(v.height) <= options.companion.maxHeight);
       if (variation) {
-        if (variation.staticResource) {
-          if (variation.type.indexOf('image') === 0) {
-            const clickThroughUrl = variation.companionClickThroughURLTemplate;
-
-            const dest = window$.document.getElementById(options.companion.elementId);
-
-            let html;
-
-            if (clickThroughUrl) {
-              html = `<a href="${clickThroughUrl}" target="_blank"><img src="${variation.staticResource}"/></a>`;
-            } else {
-              html = `<img src="${variation.staticResource}"/>`;
-            }
-            dest.innerHTML = html;
-          } else if (['application/x-javascript', 'text/javascript', 'application/javascript'].indexOf(variation.type) > -1) {
-            // handle script
-          } else if (variation.type === 'application/x-shockwave-flash') {
-            // handle flash
-          }
-        }
+        companionAdTracker = new VASTTracker(this.vastClient, ad, companionCreative, variation);
+        companionAdTracker.on('clickthrough', onClickThrough);
       }
     }
 
-    this.tracker = new VASTTracker(this.vastClient, adWithLinear, linearCreative, companionCreative);
+    return new GroupedTrackers(linearAdTracker, companionAdTracker);
+  }
 
-    this.vastCreative = linearCreative;
+  /**
+   *
+   * @private
+   */
+  _showCompanion() {
+    const companionTracker = this.tracker.companionTracker;
+    const dest = window.document.getElementById(this.options.companion.elementId);
 
-    if (linearCreative.mediaFiles.length) {
-      console.log('Trigger ads ready');
-      this.player.trigger('adsready');
-    } else {
-      this.player.trigger('adscanceled');
+    if (companionTracker && companionTracker.variation && dest) {
+      const variation = companionTracker.variation;
+
+      const onClick = () => {
+        companionTracker.click();
+      }
+
+      const hyperLink = document.createElement("a");
+      hyperLink.src = "#";
+      hyperLink.addEventListener("click", onClick);
+
+      const image = document.createElement("img");
+      image.src = variation.staticResource;
+
+      hyperLink.appendChild(image);
+
+      dest.innerHTML = "";
+      dest.appendChild(hyperLink)
+    }
+    else if (dest) {
+      // TODO: option to remove last companion ad when content plays?
+      dest.innerHTML = "";
     }
   }
 
   /**
    * Get Vast Content
    *
+   * @returns {Promise<VASTResponse>}
    * @private
    */
   _getVastContent() {
@@ -193,7 +327,7 @@ class VastPlugin extends Plugin {
    *
    * @private
    */
-  _doPreroll(vastCreative) {
+  _startPreroll() {
     const player = this.player;
     const options = this.options;
 
@@ -209,9 +343,7 @@ class VastPlugin extends Plugin {
       player.controlBar.progressControl.disable();
     }
 
-    player.src(createSourceObjects(vastCreative.mediaFiles));
-
-    const blocker = window$.document.createElement('div');
+    const blocker = window.document.createElement('div');
 
     blocker.className = 'vast-blocker';
     blocker.onclick = () => {
@@ -219,17 +351,13 @@ class VastPlugin extends Plugin {
         player.play();
         return false;
       }
-      this.tracker.click();
+      this.tracker.linearAdTracker.click();
     };
-
-    this.tracker.on('clickthrough', url => {
-      window$.open(url, '_blank');
-    });
 
     this.domElements.blocker = blocker;
     player.el().insertBefore(blocker, player.controlBar.el());
 
-    const skipButton = window$.document.createElement('div');
+    const skipButton = window.document.createElement('div');
 
     skipButton.className = 'vast-skip-button';
     skipButton.style.display = 'none';
@@ -245,14 +373,14 @@ class VastPlugin extends Plugin {
       this.player.loadingSpinner.el().style.display = 'none';
     });
 
-    this.eventListeners.teardown = () => this._tearDown();
+    this.eventListeners.teardown = () => this._endPreroll();
 
     skipButton.onclick = (e) => {
       if ((' ' + skipButton.className + ' ').indexOf(' enabled ') >= 0) {
-        this.tracker.skip();
-        this.eventListeners.teardown();
+        this.tracker.linearAdTracker.skip();
+        this._playNextTrackedAd();
       }
-      if (window$.Event.prototype.stopPropagation !== undefined) {
+      if (window.Event.prototype.stopPropagation !== undefined) {
         e.stopPropagation();
       } else {
         return false;
@@ -261,7 +389,24 @@ class VastPlugin extends Plugin {
 
     this._setupEvents();
 
-    player.one('adended', this.eventListeners.teardown);
+    this._playNextTrackedAd();
+  }
+
+  /**
+   *
+   * @private
+   */
+  _playNextTrackedAd() {
+    const nextTracker = this.trackers.shift();
+    if (nextTracker) {
+      this.tracker = nextTracker;
+      this.player.src(createSourceObjects(this.tracker.linearAdTracker.creative.mediaFiles));
+
+      this._showCompanion();
+    }
+    else {
+      this.eventListeners.teardown();
+    }
   }
 
   /**
@@ -276,10 +421,13 @@ class VastPlugin extends Plugin {
 
     const timeLeft = Math.ceil(this.options.skip - player.currentTime());
 
+    const skipButtonElement = this.domElements.skipButton;
     if (timeLeft > 0) {
+      disableSkip(skipButtonElement);
       this.domElements.skipButton.innerHTML = 'Skip in ' + timeLeft + '...';
-    } else if ((' ' + this.domElements.skipButton.className + ' ').indexOf(' enabled ') === -1) {
-      this.domElements.skipButton.className += ' enabled ';
+    }
+    else {
+      enableSkip(skipButtonElement);
       this.domElements.skipButton.innerHTML = 'Skip';
     }
   }
@@ -289,8 +437,11 @@ class VastPlugin extends Plugin {
    *
    * @private
    */
-  _tearDown() {
-    Object.values(this.domElements).forEach(el => el.parentNode.removeChild(el));
+  _endPreroll() {
+    Object.values(this.domElements)
+      .filter(el => el.parentNode)
+      .forEach(el => el.parentNode.removeChild(el));
+
     const player = this.player;
 
     player.off('adtimeupdate', this.eventListeners.adtimeupdate);
@@ -315,41 +466,37 @@ class VastPlugin extends Plugin {
    */
   _setupEvents() {
     const player = this.player;
-    const tracker = this.tracker;
+    const thisPlugin = this;
 
-    let errorOccurred = false;
-
-    const canplayFn = function() {
-      tracker.trackImpression();
+    const adPlayFn = function() {
+      thisPlugin.tracker.linearAdTracker.trackImpression();
     };
 
     const timeupdateFn = function() {
-      if (isNaN(tracker.assetDuration)) {
-        tracker.assetDuration = player.duration();
+      if (isNaN(thisPlugin.tracker.linearAdTracker.assetDuration)) {
+        thisPlugin.tracker.linearAdTracker.assetDuration = player.duration();
       }
-      tracker.setProgress(player.currentTime());
+      thisPlugin.tracker.linearAdTracker.setProgress(player.currentTime());
     };
 
     const pauseFn = function() {
-      tracker.setPaused(true);
+      thisPlugin.tracker.linearAdTracker.setPaused(true);
       player.one('adplay', function() {
-        tracker.setPaused(false);
+        thisPlugin.tracker.linearAdTracker.setPaused(false);
       });
     };
 
-    const errorFn = function() {
+    const adErrorFn = (/*err*/) => {
       const MEDIAFILE_PLAYBACK_ERROR = '405';
-
-      tracker.errorWithCode(MEDIAFILE_PLAYBACK_ERROR);
-      errorOccurred = true;
+      thisPlugin.tracker.linearAdTracker.errorWithCode(MEDIAFILE_PLAYBACK_ERROR);
       // Do not want to show VAST related errors to the user
       player.error(null);
-      player.trigger('adended');
+      this._playNextTrackedAd();
     };
 
     const fullScreenFn = function() {
       // for 'fullscreen' & 'exitfullscreen'
-      tracker.setFullscreen(player.isFullscreen());
+      thisPlugin.tracker.linearAdTracker.setFullscreen(player.isFullscreen());
     };
 
     const muteFn = (function() {
@@ -361,13 +508,13 @@ class VastPlugin extends Plugin {
         const mutedNow = player.muted();
 
         if (previousMuted !== mutedNow) {
-          tracker.setMuted(mutedNow);
+          thisPlugin.tracker.linearAdTracker.setMuted(mutedNow);
           previousMuted = mutedNow;
         } else if (previousVolume !== volumeNow) {
           if (previousVolume > 0 && volumeNow === 0) {
-            tracker.setMuted(true);
+            thisPlugin.tracker.linearAdTracker.setMuted(true);
           } else if (previousVolume === 0 && volumeNow > 0) {
-            tracker.setMuted(false);
+            thisPlugin.tracker.linearAdTracker.setMuted(false);
           }
 
           previousVolume = volumeNow;
@@ -375,24 +522,30 @@ class VastPlugin extends Plugin {
       };
     })();
 
-    player.on('adcanplay', canplayFn);
+    const adEndedFn = () => {
+      console.log("Ad ended");
+      // Ad ended, not skipped
+      thisPlugin.tracker.linearAdTracker.complete();
+      thisPlugin._playNextTrackedAd();
+    };
+
+    player.on('adended', adEndedFn);
+    player.on('adplay', adPlayFn);
     player.on('adtimeupdate', timeupdateFn);
+    // TODO: why is 'adpause' event being triggered at end of video?
     player.on('adpause', pauseFn);
-    player.on('aderror', errorFn);
+    player.on('aderror', adErrorFn);
     player.on('advolumechange', muteFn);
     player.on('fullscreenchange', fullScreenFn);
 
     player.one('vast-done', function() {
-      player.off('adcanplay', canplayFn);
+      player.off('adplay', adPlayFn);
       player.off('adtimeupdate', timeupdateFn);
       player.off('adpause', pauseFn);
-      player.off('aderror', errorFn);
+      player.off('aderror', adErrorFn);
       player.off('advolumechange', muteFn);
       player.off('fullscreenchange', fullScreenFn);
-
-      if (!errorOccurred) {
-        tracker.complete();
-      }
+      player.off('adended', adEndedFn)
     });
   }
 }
