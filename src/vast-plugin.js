@@ -148,7 +148,6 @@ class VastPlugin extends Plugin {
     this.tracker = null;
 
     player.on('readyforpreroll', () => {
-      console.log('Trigger ready for preroll');
       const trackers = this.trackers;
 
       if (trackers.length === 1) {
@@ -218,7 +217,6 @@ class VastPlugin extends Plugin {
       this.trackers = [this._createGroupedTrackers(ad)];
     }
 
-    console.log('Trigger ads ready');
     this.player.trigger('adsready');
   }
 
@@ -479,10 +477,12 @@ class VastPlugin extends Plugin {
     };
 
     const pauseFn = function() {
-      thisPlugin.tracker.linearAdTracker.setPaused(true);
-      player.one('adplay', function() {
-        thisPlugin.tracker.linearAdTracker.setPaused(false);
-      });
+      if (player.remainingTime() > 0) {
+        thisPlugin.tracker.linearAdTracker.setPaused(true);
+        player.one('adplay', function() {
+          thisPlugin.tracker.linearAdTracker.setPaused(false);
+        });
+      }
     };
 
     const adErrorFn = (/*err*/) => {
@@ -522,7 +522,6 @@ class VastPlugin extends Plugin {
     })();
 
     const adEndedFn = () => {
-      console.log("Ad ended");
       // Ad ended, not skipped
       thisPlugin.tracker.linearAdTracker.complete();
       thisPlugin._playNextTrackedAd();
@@ -531,7 +530,6 @@ class VastPlugin extends Plugin {
     player.on('adended', adEndedFn);
     player.on('adplay', adPlayFn);
     player.on('adtimeupdate', timeupdateFn);
-    // TODO: why is 'adpause' event being triggered at end of video?
     player.on('adpause', pauseFn);
     player.on('aderror', adErrorFn);
     player.on('advolumechange', muteFn);
