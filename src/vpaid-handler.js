@@ -1,4 +1,6 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
+import window from 'global/window';
+import document from 'global/document';
 
 /**
  *
@@ -14,7 +16,7 @@ export default function handleVPAID(player, tracker, options) {
   const vpaidMediaFile = creative.mediaFiles.find(mediaFile => mediaFile.apiFramework === 'VPAID' && validMime(mediaFile));
 
   if (!vpaidMediaFile) {
-    console.warn("Only JavaScript VPAID is supported by this player");
+    this.player.warn('Only JavaScript VPAID is supported by this player');
     this.player.trigger('adscanceled');
     return;
   }
@@ -22,13 +24,13 @@ export default function handleVPAID(player, tracker, options) {
   const techScreen = player.el().querySelector('.vjs-tech');
 
   const vpaidContainerElement = document.createElement('div');
+
   vpaidContainerElement.className = options.vpaid.containerClass;
   vpaidContainerElement.id = options.vpaid.containerId;
 
   player.el().insertBefore(vpaidContainerElement, player.controlBar.el());
 
   const vpaidClient = new VPAIDHTML5Client(vpaidContainerElement, techScreen, {});
-
 
   player.ads.startLinearAdMode();
 
@@ -39,7 +41,7 @@ export default function handleVPAID(player, tracker, options) {
 
   function onLoad(err, adUnit) {
     if (err) {
-      console.error(err);
+      player.error(err);
       player.controlBar.show();
       player.trigger('aderror');
       return;
@@ -54,7 +56,8 @@ export default function handleVPAID(player, tracker, options) {
 
     let videoElement;
 
-    function onHandShake(error, result) {
+    // args: error, result
+    function onHandShake() {
       const initialDimensions = getPlayerDimensions(player);
 
       const creativeData = {
@@ -62,6 +65,7 @@ export default function handleVPAID(player, tracker, options) {
       };
 
       const videoInstance = options.vpaid.videoInstance;
+
       if (videoInstance === 'same') {
         videoElement = player.tech({kindaKnowWhatImDoing: true}).el();
       } else if (videoInstance === 'new') {
@@ -70,7 +74,7 @@ export default function handleVPAID(player, tracker, options) {
         vpaidContainerElement.appendChild(videoElement);
       } else {
         if (videoInstance !== 'none') {
-          console.warn(videoInstance + " is an invalid videoInstance value. Defaulting to 'none'.")
+          player.warn(videoInstance + ' is an invalid videoInstance value. Defaulting to \'none\'.');
         }
         videoElement = null;
       }
@@ -119,10 +123,10 @@ function getPlayerDimensions(player) {
   let width = player.width();
   let height = player.height();
 
-  if(player.isFullscreen()) {
+  if (player.isFullscreen()) {
     width = window.innerWidth;
     height = window.innerHeight;
   }
 
-  return {width: width, height: height};
+  return {width, height};
 }

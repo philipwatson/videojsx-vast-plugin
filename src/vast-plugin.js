@@ -1,7 +1,8 @@
-import videojs from 'video.js'
-import {VASTClient, VASTParser, VASTTracker} from '@dailymotion/vast-client'
-import handleVPAID from 'vpaid-handler'
-
+import videojs from 'video.js';
+import {VASTClient, VASTParser, VASTTracker} from '@dailymotion/vast-client';
+import handleVPAID from 'vpaid-handler';
+import window from 'global/window';
+import document from 'global/document';
 const Plugin = videojs.getPlugin('plugin');
 
 /**
@@ -22,6 +23,7 @@ function createSourceObjects(mediaFiles) {
  */
 function hasVPAID(creative) {
   const mediaFiles = creative.mediaFiles;
+
   for (let i = 0; i < mediaFiles.length; i++) {
     if (mediaFiles[i].apiFramework && mediaFiles[i].apiFramework === 'VPAID') {
       return true;
@@ -49,13 +51,13 @@ function doesCreativeRequireApiFramework(creative) {
   return creative.mediaFiles.every(mediaFile => mediaFile && mediaFile.apiFramework);
 }
 
-/***
+/**
  *
  * @param {HTMLElement} skipButtonElement
  */
 const isSkipEnabled = (skipButtonElement) => (' ' + skipButtonElement.className + ' ').indexOf(' enabled ') > -1;
 
-/***
+/**
  *
  * @param {HTMLElement} skipButtonElement
  */
@@ -63,9 +65,9 @@ const enableSkip = (skipButtonElement) => {
   if (!isSkipEnabled(skipButtonElement)) {
     skipButtonElement.className += ' enabled ';
   }
-}
+};
 
-/***
+/**
  *
  * @param {HTMLElement} skipButtonElement
  */
@@ -74,7 +76,7 @@ const disableSkip = (skipButtonElement) => {
     skipButtonElement.className =
       skipButtonElement.className.replace(' enabled ', '');
   }
-}
+};
 
 const linearFn = creative => creative.type === 'linear' && creative.mediaFiles.length;
 const companionFn = creative => creative.type === 'companion';
@@ -141,7 +143,7 @@ class VastPlugin extends Plugin {
     /** @type {Object.<string, function>} */
     this.eventListeners = {};
     /** @type {Object.<string, HTMLElement>} */
-    this.domElements = {}
+    this.domElements = {};
     /** @type {GroupedTrackers[]} */
     this.trackers = [];
     /** @type {GroupedTrackers|null} */
@@ -152,20 +154,18 @@ class VastPlugin extends Plugin {
 
       if (trackers.length === 1) {
         const linearAdTracker = trackers[0].linearAdTracker;
-        const creative = linearAdTracker.creative
+        const creative = linearAdTracker.creative;
+
         if (creative.type === 'linear') {
           if (doesCreativeRequireApiFramework(creative)) {
             if (hasVPAID(creative)) {
               handleVPAID(player, linearAdTracker, videojs.mergeOptions(defaultOptions, options || {}));
               return;
             }
-            else {
-              this.player.trigger('adscanceled');
-              return;
-            }
+            this.player.trigger('adscanceled');
+            return;
           }
-        }
-        else {
+        } else {
           this.player.trigger('adscanceled');
           return;
         }
@@ -178,7 +178,7 @@ class VastPlugin extends Plugin {
       .catch(err => {
         this.player.trigger('adscanceled');
         // eslint-disable-next-line no-console
-        console.log(`Ad cancelled: ${err.message}`);
+        this.player.log(`Ad cancelled: ${err.message}`);
       });
   }
 
@@ -207,13 +207,13 @@ class VastPlugin extends Plugin {
       .filter(ad => !doAllLinearCreativesRequireApiFramework(ad))
       .sort((ad1, ad2) => ad1.sequence - ad2.sequence);
 
-    const standaloneAds = adsWithLinear.filter(ad => !adPod.includes(ad))
+    const standaloneAds = adsWithLinear.filter(ad => !adPod.includes(ad));
 
     if (adPod.length) {
       this.trackers = adPod.map(ad => this._createGroupedTrackers(ad));
-    }
-    else {
+    } else {
       const [ad] = standaloneAds;
+
       this.trackers = [this._createGroupedTrackers(ad)];
     }
 
@@ -233,17 +233,21 @@ class VastPlugin extends Plugin {
 
     const linearAdTracker =
       new VASTTracker(this.vastClient, ad, ad.creatives.find(linearFn), ad.creatives.find(companionFn));
+
     linearAdTracker.on('clickthrough', onClickThrough);
 
     let companionAdTracker = null;
+
     const companionCreative = ad.creatives.find(companionFn);
+
     if (companionCreative) {
       // Just pick the first suitable companion ad for now
       const options = this.options;
       const variation = companionCreative.variations
         .filter(v => v.staticResource)
         .filter(v => v.type.indexOf('image') === 0)
-        .find(v => parseInt(v.width) <= options.companion.maxWidth && parseInt(v.height) <= options.companion.maxHeight);
+        .find(v => parseInt(v.width, 10) <= options.companion.maxWidth && parseInt(v.height, 10) <= options.companion.maxHeight);
+
       if (variation) {
         companionAdTracker = new VASTTracker(this.vastClient, ad, companionCreative, variation);
         companionAdTracker.on('clickthrough', onClickThrough);
@@ -259,30 +263,31 @@ class VastPlugin extends Plugin {
    */
   _showCompanion() {
     const companionTracker = this.tracker.companionTracker;
-    const dest = window.document.getElementById(this.options.companion.elementId);
+    const dest = document.getElementById(this.options.companion.elementId);
 
     if (companionTracker && companionTracker.variation && dest) {
       const variation = companionTracker.variation;
 
       const onClick = () => {
         companionTracker.click();
-      }
+      };
 
-      const hyperLink = document.createElement("a");
-      hyperLink.src = "#";
-      hyperLink.addEventListener("click", onClick);
+      const hyperLink = document.createElement('a');
 
-      const image = document.createElement("img");
+      hyperLink.src = '#';
+      hyperLink.addEventListener('click', onClick);
+
+      const image = document.createElement('img');
+
       image.src = variation.staticResource;
 
       hyperLink.appendChild(image);
 
-      dest.innerHTML = "";
-      dest.appendChild(hyperLink)
-    }
-    else if (dest) {
+      dest.innerHTML = '';
+      dest.appendChild(hyperLink);
+    } else if (dest) {
       // TODO: option to remove last companion ad when content plays?
-      dest.innerHTML = "";
+      dest.innerHTML = '';
     }
   }
 
@@ -293,30 +298,27 @@ class VastPlugin extends Plugin {
    * @private
    */
   _getVastContent() {
-    let {url, xml} = this.options;
+    const {url, xml} = this.options;
 
     if (url) {
       return this.vastClient.get(url, {withCredentials: this.options.withCredentials, wrapperLimit: this.options.wrapperLimit});
-    }
-    else if (xml) {
+    } else if (xml) {
       const vastParser = new VASTParser();
 
       let xmlDocument;
+
       if (xml.constructor === window.XMLDocument) {
         xmlDocument = xml;
-      }
-      else if (xml.constructor === String) {
+      } else if (xml.constructor === String) {
         xmlDocument = (new window.DOMParser()).parseFromString(xml, 'text/xml');
-      }
-      else {
+      } else {
         throw new Error('xml config option must be a String or XMLDocument');
       }
 
       return vastParser.parseVAST(xmlDocument);
     }
-    else {
-      return Promise.reject(new Error('url or xml option not set'));
-    }
+
+    return Promise.reject(new Error('url or xml option not set'));
   }
 
   /**
@@ -395,13 +397,12 @@ class VastPlugin extends Plugin {
    */
   _playNextTrackedAd() {
     const nextTracker = this.trackers.shift();
+
     if (nextTracker) {
       this.tracker = nextTracker;
       this.player.src(createSourceObjects(this.tracker.linearAdTracker.creative.mediaFiles));
-
       this._showCompanion();
-    }
-    else {
+    } else {
       this.eventListeners.teardown();
     }
   }
@@ -419,11 +420,11 @@ class VastPlugin extends Plugin {
     const timeLeft = Math.ceil(this.options.skip - player.currentTime());
 
     const skipButtonElement = this.domElements.skipButton;
+
     if (timeLeft > 0) {
       disableSkip(skipButtonElement);
       this.domElements.skipButton.innerHTML = 'Skip in ' + timeLeft + '...';
-    }
-    else {
+    } else {
       enableSkip(skipButtonElement);
       this.domElements.skipButton.innerHTML = 'Skip';
     }
@@ -485,8 +486,10 @@ class VastPlugin extends Plugin {
       }
     };
 
-    const adErrorFn = (/*err*/) => {
+    // args: err
+    const adErrorFn = () => {
       const MEDIAFILE_PLAYBACK_ERROR = '405';
+
       thisPlugin.tracker.linearAdTracker.errorWithCode(MEDIAFILE_PLAYBACK_ERROR);
       // Do not want to show VAST related errors to the user
       player.error(null);
@@ -542,7 +545,7 @@ class VastPlugin extends Plugin {
       player.off('aderror', adErrorFn);
       player.off('advolumechange', muteFn);
       player.off('fullscreenchange', fullScreenFn);
-      player.off('adended', adEndedFn)
+      player.off('adended', adEndedFn);
     });
   }
 }

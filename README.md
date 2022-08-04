@@ -15,10 +15,10 @@ Run `npm install` then `npm run-script build`.
 
 The build creates two independent artifacts in the `dist/` folder:
 
-| Artifact Name | Files                              | Description |
-| ------------- | -----------------------------------|-------|
-| Plugin        | videojsx.vast.js, videojsx.vast.css| Standalone plugin that can be integrated to an external video.js player. |
-| Video Player  | player.js                          | A file that has video.js, css and other dependencies bundled in. |
+| Artifact Name | Files                               | Description                                                              |
+|---------------|-------------------------------------|--------------------------------------------------------------------------|
+| Plugin        | videojsx.vast.js, videojsx.vast.css | Standalone plugin that can be integrated to an external video.js player. |
+| Video Player  | player.js                           | A file that has video.js, css and other dependencies bundled in.         |
  
 Also, every JavaScript `.js` file has a compressed version `.js.gz` 
 
@@ -84,34 +84,34 @@ Example:
 
 #### Options
 
-| Name               | Optional | Default | Description |
-| ------------------ | -------- |---------| ----------- |
-| `url`              | Yes      | n/a     | URL that responds with a VAST document| 
-| `xml`              | Yes      | n/a     | The VAST document. Use as an alternative to `url`. Can be a String or XMLDocument.| 
-| `seekEnabled`      | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.|          
-| `controlsEnabled`  | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing|          
-| `wrapperLimit`     | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed|          
-| `withCredentials`  | Yes      | `true`  | Enable third-party cookies on the VAST request|
-| `skip`             | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped|  
-| `companion`        | Yes      | `{}`    | See Companion options below | 
-| `vpaid`            | Yes      | `{}`    | See VPAID options below | 
+| Name              | Optional | Default | Description                                                                                    |
+|-------------------|----------|---------|------------------------------------------------------------------------------------------------|
+| `url`             | Yes      | n/a     | URL that responds with a VAST document                                                         | 
+| `xml`             | Yes      | n/a     | The VAST document. Use as an alternative to `url`. Can be a String or XMLDocument.             | 
+| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also. |          
+| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                        |          
+| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                           |          
+| `withCredentials` | Yes      | `true`  | Enable third-party cookies on the VAST request                                                 |
+| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                        |  
+| `companion`       | Yes      | `{}`    | See Companion options below                                                                    | 
+| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                        | 
 
 ##### Companion Options
 
-| Name          | Optional | Default | Description |
-| ------------- |----------|---------| ----------- |
-| `elementId`   | Yes      | `null`    | Id of the HTML element that will serve as the creative container| 
-| `maxWidth`    | Yes      | `0`       | The maximum width allowed for the creative | 
-| `maxHeight`   | Yes      | `0`       | The maximum height allowed for the creative| 
+| Name        | Optional | Default | Description                                                      |
+|-------------|----------|---------|------------------------------------------------------------------|
+| `elementId` | Yes      | `null`  | Id of the HTML element that will serve as the creative container | 
+| `maxWidth`  | Yes      | `0`     | The maximum width allowed for the creative                       | 
+| `maxHeight` | Yes      | `0`     | The maximum height allowed for the creative                      | 
 
 
 ##### VPAID Options
 
-| Name             | Optional | Default               | Description |
-| ---------------- | ---------|---------------------- | ----------- |
-| `videoInstance`  | Yes      |`'none'`               | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
-| `containerId`    | Yes      |`undefined`            | The id of the container. Usage is not recommended.  | 
-| `containerClass` | Yes      |`'vjs-vpaid-container'`| The class name of the container. Usage is not recommended.| 
+| Name             | Optional | Default                 | Description                                                                                         |
+|------------------|----------|-------------------------|-----------------------------------------------------------------------------------------------------|
+| `videoInstance`  | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
+| `containerId`    | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  | 
+| `containerClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          | 
 
 ## Dev Workflow
 

@@ -1,3 +1,6 @@
+/*!***********************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./src/vast-player.css ***!
+  \***********************************************************************/
 /*
 Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa763299739f6a7c801b5be4b90b3b363)
 */
@@ -40,3 +43,5 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
     bottom: 0;
 }
 
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidmlkZW9qc3gudmFzdC5jc3MiLCJtYXBwaW5ncyI6Ijs7O0FBQUE7O0NBRUM7O0FBRUQ7SUFDSSxjQUFjO0lBQ2Qsa0JBQWtCO0lBQ2xCLFFBQVE7SUFDUixRQUFRO0lBQ1IsV0FBVztJQUNYLHNCQUFzQjtJQUN0QixXQUFXO0lBQ1gsZUFBZTtJQUNmLGtCQUFrQjtJQUNsQixpQkFBaUI7SUFDakIsYUFBYTtJQUNiLFVBQVU7QUFDZDs7QUFFQTtJQUNJLGVBQWU7SUFDZixXQUFXO0FBQ2Y7O0FBRUE7SUFDSSxlQUFlO0lBQ2YsZ0JBQWdCO0FBQ3BCOztBQUVBO0lBQ0ksY0FBYztJQUNkLGtCQUFrQjtJQUNsQixTQUFTO0lBQ1QsVUFBVTtJQUNWLFlBQVk7SUFDWixXQUFXO0lBQ1gsTUFBTTtJQUNOLE9BQU87SUFDUCxRQUFRO0lBQ1IsU0FBUztBQUNiIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vdmlkZW9qc3gtdmFzdC1wbHVnaW4vLi9zcmMvdmFzdC1wbGF5ZXIuY3NzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qXG5PcmlnaW5hbCBAIGh0dHBzOi8vZ2l0aHViLmNvbS90aGVvbmlvbi92aWRlb2pzLXZhc3QtcGx1Z2luIChjb21taXQgYmY2Y2U4NWZhNzYzMjk5NzM5ZjZhN2M4MDFiNWJlNGI5MGIzYjM2MylcbiovXG5cbi52YXN0LXNraXAtYnV0dG9uIHtcbiAgICBkaXNwbGF5OiBibG9jaztcbiAgICBwb3NpdGlvbjogYWJzb2x1dGU7XG4gICAgdG9wOiA1cHg7XG4gICAgcmlnaHQ6IDA7XG4gICAgd2lkdGg6IGF1dG87XG4gICAgYmFja2dyb3VuZC1jb2xvcjogIzAwMDtcbiAgICBjb2xvcjogI0FBQTtcbiAgICBmb250LXNpemU6IDEycHg7XG4gICAgZm9udC1zdHlsZTogaXRhbGljO1xuICAgIGxpbmUtaGVpZ2h0OiAxMnB4O1xuICAgIHBhZGRpbmc6IDEwcHg7XG4gICAgei1pbmRleDogMjtcbn1cblxuLnZhc3Qtc2tpcC1idXR0b24uZW5hYmxlZCB7XG4gICAgY3Vyc29yOiBwb2ludGVyO1xuICAgIGNvbG9yOiAjZmZmO1xufVxuXG4udmFzdC1za2lwLWJ1dHRvbi5lbmFibGVkOmhvdmVyIHtcbiAgICBjdXJzb3I6IHBvaW50ZXI7XG4gICAgYmFja2dyb3VuZDogIzMzMztcbn1cblxuLnZhc3QtYmxvY2tlciB7XG4gICAgZGlzcGxheTogYmxvY2s7XG4gICAgcG9zaXRpb246IGFic29sdXRlO1xuICAgIG1hcmdpbjogMDtcbiAgICBwYWRkaW5nOiAwO1xuICAgIGhlaWdodDogMTAwJTtcbiAgICB3aWR0aDogMTAwJTtcbiAgICB0b3A6IDA7XG4gICAgbGVmdDogMDtcbiAgICByaWdodDogMDtcbiAgICBib3R0b206IDA7XG59XG4iXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=*/
