@@ -92,7 +92,6 @@ describe('Video player', () => {
 
     pubserver = await setupPublisherServer(adPort);
     pubPort = pubserver.address().port;
-    jest.setTimeout(10000);
   });
 
   afterAll(() => {
