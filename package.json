@@ -50,7 +50,7 @@
     "portfinder": "^1.0.28",
     "puppeteer": "^1.20.0",
     "style-loader": "^0.23.1",
-    "videojs-standard": "^8.0.6",
+    "videojs-standard": "^9.0.1",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.3",
