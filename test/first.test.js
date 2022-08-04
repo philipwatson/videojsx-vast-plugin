@@ -129,7 +129,7 @@ describe('Video player', () => {
 
     await clickVideo();
 
-    await page.waitFor(() => window.test.playedSources.length > 0, {timeout: 3000});
+    await page.waitForFunction('window.test.playedSources.length > 0');
 
     const result = await page.evaluate(() => window.test.playedSources);
 
