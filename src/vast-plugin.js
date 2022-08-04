@@ -1,7 +1,6 @@
 import videojs from 'video.js'
-import {VASTClient, VASTParser, VASTTracker} from 'vast-client'
+import {VASTClient, VASTParser, VASTTracker} from '@dailymotion/vast-client'
 import handleVPAID from 'vpaid-handler'
-import {CreativeLinear} from "vast-client/src/creative/creative_linear";
 
 const Plugin = videojs.getPlugin('plugin');
 
@@ -18,7 +17,7 @@ function createSourceObjects(mediaFiles) {
 /**
  * Determine if the VAST creative has a VPAID media file
  *
- * @param {CreativeLinear} creative
+ * @param {Object} creative
  * @returns {boolean}
  */
 function hasVPAID(creative) {
@@ -33,7 +32,7 @@ function hasVPAID(creative) {
 
 /**
  *
- * @param {Ad} ad
+ * @param {Object} ad
  * @returns {boolean}
  */
 function doAllLinearCreativesRequireApiFramework(ad) {
@@ -43,7 +42,7 @@ function doAllLinearCreativesRequireApiFramework(ad) {
 
 /**
  *
- * @param {CreativeLinear} creative
+ * @param {Object} creative
  * @returns {boolean}
  */
 function doesCreativeRequireApiFramework(creative) {
@@ -155,7 +154,7 @@ class VastPlugin extends Plugin {
       if (trackers.length === 1) {
         const linearAdTracker = trackers[0].linearAdTracker;
         const creative = linearAdTracker.creative
-        if (creative instanceof CreativeLinear) {
+        if (creative.type === 'linear') {
           if (doesCreativeRequireApiFramework(creative)) {
             if (hasVPAID(creative)) {
               handleVPAID(player, linearAdTracker, videojs.mergeOptions(defaultOptions, options || {}));
@@ -186,7 +185,7 @@ class VastPlugin extends Plugin {
 
   /**
    *
-   * @param {VASTResponse} vastResponse
+   * @param {Object} vastResponse
    * @private
    */
   _handleVast(vastResponse) {
@@ -225,7 +224,7 @@ class VastPlugin extends Plugin {
 
   /**
    *
-   * @param {Ad} ad
+   * @param {Object} ad
    * @returns {GroupedTrackers}
    * @private
    */
@@ -292,7 +291,7 @@ class VastPlugin extends Plugin {
   /**
    * Get Vast Content
    *
-   * @returns {Promise<VASTResponse>}
+   * @returns {Promise<Object>}
    * @private
    */
   _getVastContent() {

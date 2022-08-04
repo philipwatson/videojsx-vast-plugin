@@ -30,10 +30,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vast-client": "^2.0.4",
-    "video.js": "^7.2.3",
-    "videojs-contrib-ads": "^6.6.1",
-    "vpaid-html5-client": "git://github.com/MailOnline/VPAIDHTML5Client#0.1.14"
+    "@dailymotion/vast-client": "^4.0.0",
+    "video.js": "^7.20.2",
+    "videojs-contrib-ads": "^6.9.0",
+    "vpaid-html5-client": "^0.1.14"
   },
   "devDependencies": {
     "@babel/core": "^7.7.7",
