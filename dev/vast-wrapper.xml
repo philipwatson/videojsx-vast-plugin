@@ -1,0 +1,21 @@
+<VAST version="3.0">
+    <Ad>
+        <Wrapper>
+            <AdSystem>AdSystem101</AdSystem>
+            <VASTAdTagURI><![CDATA[http://localhost:9999/vast.xml]]></VASTAdTagURI>
+            <Error><![CDATA[http://localhost:9999/pixel1x1.gif?track=wrapper-error]]></Error>
+            <Impression><![CDATA[http://localhost:9999/pixel1x1.gif?track=wrapper-impression]]></Impression>
+            <Creatives>
+                <Creative>
+                    <Linear>
+                        <TrackingEvents>
+                            <Tracking event="start">
+                                <![CDATA[http://localhost:9999/pixel1x1.gif?track=wrapper-start]]>
+                            </Tracking>
+                        </TrackingEvents>
+                    </Linear>
+                </Creative>
+            </Creatives>
+        </Wrapper>
+    </Ad>
+</VAST>

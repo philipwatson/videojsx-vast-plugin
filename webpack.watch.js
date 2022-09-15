@@ -6,7 +6,6 @@ module.exports = common.map(c => merge(c, {
   devtool: 'inline-source-map',
   watch: true,
   watchOptions: {
-
     ignored: /node_modules/
   }
 }));
