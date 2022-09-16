@@ -51,17 +51,17 @@ export default function handleVPAID(player, tracker, options) {
     adUnit.subscribe('AdLoaded', onAdLoaded);
     adUnit.subscribe('AdStarted', onAdStarted);
     adUnit.subscribe('AdStopped', onAdStopped);
+    adUnit.subscribe('AdError', onAdError);
 
     // TODO: handle VAST tracking
 
     let videoElement;
 
-    // args: error, result
-    function onHandShake() {
+    function onHandShake(/*error, version*/) {
       const initialDimensions = getPlayerDimensions(player);
 
       const creativeData = {
-        AdParameters: creative.adParameters
+        AdParameters: creative.adParameters || ''
       };
 
       const videoInstance = options.vpaid.videoInstance;
@@ -108,6 +108,15 @@ export default function handleVPAID(player, tracker, options) {
 
       if (options.vpaid.videoInstance === 'new' && videoElement.parentElement) {
         videoElement.parentElement.removeChild(videoElement);
+      }
+    }
+
+    function onAdError(message) {
+      // TODO: review
+      console.log(`VPAID Error ${message}`);
+      try {
+        adUnit.stopAd();
+      } catch (ignore) {
       }
     }
 
