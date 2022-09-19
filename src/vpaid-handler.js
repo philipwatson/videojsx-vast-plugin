@@ -1,141 +1,426 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
 import window from 'global/window';
 import document from 'global/document';
+import {once} from './utils';
 
-/**
- *
- * @param player
- * @param {VASTTracker} tracker
- * @param {Object} options
- */
-export default function handleVPAID(player, tracker, options) {
-  const creative = tracker.creative;
-  const validTypes = ['application/x-javascript', 'text/javascript', 'application/javascript'];
-  const validMime = mediaFile => validTypes.indexOf(mediaFile.mimeType.trim()) > -1;
+const VALID_TYPES = ['application/x-javascript', 'text/javascript', 'application/javascript'];
 
-  const vpaidMediaFile = creative.mediaFiles.find(mediaFile => mediaFile.apiFramework === 'VPAID' && validMime(mediaFile));
+export class VPAIDHandler {
+  #forceStopDone
+  #cancelled
+  #started
+  #player
+  #options
+  #eventTarget
 
-  if (!vpaidMediaFile) {
-    this.player.warn('Only JavaScript VPAID is supported by this player');
-    this.player.trigger('adscanceled');
-    return;
+  constructor(player, options) {
+    this.#player = player;
+    this.#options = options;
+    this.#eventTarget = new videojs.EventTarget();
   }
 
-  const techScreen = player.el().querySelector('.vjs-tech');
+  handle(tracker) {
+    this.#cancelled = false;
+    this.#started = false
+    this.#forceStopDone = false;
 
-  const vpaidContainerElement = document.createElement('div');
+    return new Promise((resolve, reject) => {
+      const options = this.#options;
+      const player = this.#player;
+      /**
+       *
+       * @type {HTMLElement|null}
+       */
+      let container = null;
+      let containerAttributes = {};
+      let containerIsFixed = false;
 
-  vpaidContainerElement.className = options.vpaid.containerClass;
-  vpaidContainerElement.id = options.vpaid.containerId;
 
-  player.el().insertBefore(vpaidContainerElement, player.controlBar.el());
+      const onLoad = (err, adUnit) => {
+        let videoElement;
 
-  const vpaidClient = new VPAIDHTML5Client(vpaidContainerElement, techScreen, {});
-
-  player.ads.startLinearAdMode();
-
-  player.pause();
-  player.controlBar.hide();
-
-  vpaidClient.loadAdUnit(vpaidMediaFile.fileURL, onLoad);
-
-  function onLoad(err, adUnit) {
-    if (err) {
-      player.error(err);
-      player.controlBar.show();
-      player.trigger('aderror');
-      return;
-    }
-
-    adUnit.handshakeVersion('2.0', onHandShake);
-    adUnit.subscribe('AdLoaded', onAdLoaded);
-    adUnit.subscribe('AdStarted', onAdStarted);
-    adUnit.subscribe('AdStopped', onAdStopped);
-    adUnit.subscribe('AdError', onAdError);
-
-    // TODO: handle VAST tracking
-
-    let videoElement;
-
-    function onHandShake(/*error, version*/) {
-      const initialDimensions = getPlayerDimensions(player);
-
-      const creativeData = {
-        AdParameters: creative.adParameters || ''
-      };
-
-      const videoInstance = options.vpaid.videoInstance;
-
-      if (videoInstance === 'same') {
-        videoElement = player.tech({kindaKnowWhatImDoing: true}).el();
-      } else if (videoInstance === 'new') {
-        videoElement = document.createElement('video');
-        videoElement.style.cssText = 'position:absolute; top:0; left:0; z-index:2 !important;';
-        vpaidContainerElement.appendChild(videoElement);
-      } else {
-        if (videoInstance !== 'none') {
-          player.warn(videoInstance + ' is an invalid videoInstance value. Defaulting to \'none\'.');
+        if (err) {
+          reject(err);
+          return;
         }
-        videoElement = null;
+
+        const onAdComplete = () => {
+          cleanUp();
+          resolve();
+        };
+
+        adUnit.subscribe('AdStopped', onAdComplete);
+
+        const forceStopAd = err => {
+          if (adUnit && !this.#forceStopDone) {
+            adUnit.unsubscribe('AdStopped', onAdComplete);
+            const onAdCancel = () => {
+              this.#forceStopDone = true;
+              cleanUp();
+              reject(err);
+            };
+            subscribeWithTimeout(adUnit, 'AdStopped', onAdCancel, onAdCancel);
+            adUnit.stopAd();
+          }
+          else {
+            this.#forceStopDone = true;
+            reject(err);
+          }
+        }
+
+        this.#eventTarget.on('forceStopAd', forceStopAd);
+
+        adUnit.subscribe('AdError', message => {
+          // General VPAID Error = 901 (in VAST 3 spec)
+          tracker.error({ERRORCODE: 901});
+          this.#forceStopDone = true;
+          cleanUp();
+          reject(`Fatal VPAID Error: ${typeof message === 'object' ? JSON.stringify(message) : message}`);
+        });
+
+        if (this.#cancelled) {
+          forceStopAd('Received cancel signal from player');
+          return;
+        }
+
+        const cleanUp = () => {
+          player.controlBar.show();
+
+          player.off('playerresize', resizeAd);
+
+          if (options.vpaid.videoInstance === 'new' && videoElement.parentElement) {
+            videoElement.parentElement.removeChild(videoElement);
+          }
+
+          vpaidClient.destroy();
+
+          // Some VPAID creatives don't clean up after themselves
+          if (container) {
+            if (containerIsFixed) {
+              container.innerHTML = '';
+
+              const before = containerAttributes;
+              const after = getAttributes(container);
+
+              for (const [key, value] of Object.entries(after)) {
+                if (before.hasOwnProperty(key)) {
+                  if (before[key] !== value) {
+                    // restore changed
+                    container.setAttribute(key, before[key]);
+                  }
+                } else {
+                  // removed added
+                  container.removeAttribute(key);
+                }
+              }
+
+              for (const [key, value] of Object.entries(before)) {
+                if (!after.hasOwnProperty(key)) {
+                  // restore removed
+                  container.setAttribute(key, value);
+                }
+              }
+            } else if (container.parentElement) {
+              container.parentElement.removeChild(container);
+            }
+            container = null;
+          }
+        }
+
+        const onHandShake = (error, version) => {
+          if (error) {
+            log.console(error);
+            forceStopAd('Error on VPAID handshake');
+            return;
+          }
+
+          const creativeData = {
+            AdParameters: creative.adParameters || ''
+          };
+
+          const videoInstance = options.vpaid.videoInstance;
+
+          if (videoInstance === 'same') {
+            videoElement = player.tech({kindaKnowWhatImDoing: true}).el();
+          } else if (videoInstance === 'new') {
+            videoElement = window.document.createElement('video');
+            videoElement.style.cssText = 'position:absolute; top:0; left:0; z-index:2 !important;';
+            container.appendChild(videoElement);
+          } else {
+            if (videoInstance !== 'none') {
+              console.log(`${videoInstance} is an invalid videoInstance value. Defaulting to \'none\'.`);
+            }
+            videoElement = null;
+          }
+
+          const environmentVars = {
+            slot: container,
+            videoSlot: videoElement,
+            // videoSlotCanAutoPlay: true
+          };
+
+          subscribeWithTimeout(adUnit, 'AdLoaded', onAdLoaded, forceStopAd);
+
+          const viewMode = player.isFullscreen() ? 'fullscreen' : 'normal';
+
+          adUnit.initAd(player.currentWidth(), player.currentHeight(), viewMode, -1, creativeData, environmentVars);
+        }
+
+        const onAdLoaded = () => {
+          if (this.#cancelled) {
+            forceStopAd('Received cancel signal');
+            return;
+          }
+
+          adUnit.subscribe('AdSkipped', () => {
+            tracker.skip();
+          });
+
+          adUnit.subscribe('AdVolumeChange', () => {
+            const lastVolume = player.volume()
+            adUnit.getAdVolume((error, currentVolume) => {
+              if (error) return;
+
+              if (currentVolume === 0 && lastVolume > 0) {
+                tracker.setMuted(true);
+              } else if (currentVolume > 0 && lastVolume === 0) {
+                tracker.setMuted(false);
+              }
+
+              player.volume(currentVolume);
+            });
+          });
+
+          adUnit.subscribe('AdImpression', () => {
+            // will also trigger createView
+            tracker.trackImpression();
+          });
+
+
+          adUnit.subscribe('AdClickThru',
+            /**
+             *
+             * @param {string} url
+             * @param {string} id
+             * @param {boolean} playerHandles
+             */
+            (url, id, playerHandles) => {
+              if (playerHandles) {
+                tracker.once('clickthrough', resolvedUrl => {
+                  window.open(resolvedUrl, '_blank');
+                });
+              }
+              // The url here is a fallback - the tracker will use VAST click url if it exists.
+              tracker.click(url);
+            }
+          );
+
+          adUnit.subscribe('AdVideoFirstQuartile', () => {
+            tracker.track('firstQuartile');
+          });
+
+          adUnit.subscribe('AdVideoMidpoint', () => {
+            tracker.track('midpoint');
+          });
+
+          adUnit.subscribe('AdVideoThirdQuartile', () => {
+            tracker.track('thirdQuartile');
+          });
+
+          adUnit.subscribe('AdVideoComplete', () => {
+            tracker.track('complete');
+          });
+
+          adUnit.subscribe('AdUserAcceptInvitation', () => {
+            tracker.acceptInvitation();
+          });
+
+          adUnit.subscribe('AdUserMinimize', () => {
+            tracker.minimize();
+          });
+
+          adUnit.subscribe('AdUserClose', () => {
+            tracker.close();
+          });
+
+          adUnit.subscribe('AdPaused', () => {
+            tracker.setPaused(true);
+          });
+
+          adUnit.subscribe('AdPlaying', () => {
+            tracker.setPaused(false);
+          });
+
+          adUnit.getAdLinear(withTimeout((err, isLinear) => {
+              if (this.#cancelled) {
+                forceStopAd('Received cancel signal');
+                return;
+              }
+
+              if (err) {
+                forceStopAd(err);
+              } else if (!isLinear) {
+                // TODO: support overlay banner
+                forceStopAd('Non-linear not supported')
+              } else {
+                startLinearAd();
+              }
+            },
+            () => {
+              forceStopAd('Unable to get mode of operation: linear or non-linear');
+            }));
+
+          const startLinearAd = () => {
+            player.controlBar.hide();
+
+            // A VPAID adunit may (incorrectly?) call AdStarted again for the first quartile event
+            const onAdStartedOnce = once(onAdStarted);
+            subscribeWithTimeout(adUnit, 'AdStarted', onAdStartedOnce, forceStopAd);
+            adUnit.startAd();
+          }
+        }
+
+        const onAdStarted = () => {
+          if (!this.#cancelled) {
+            this.#started = true
+            tracker.track('start');
+            player.on('playerresize', resizeAd);
+            player.trigger('ads-ad-started');
+          } else {
+            forceStopAd('Received cancel signal');
+          }
+        }
+
+        const resizeAd = () => {
+          adUnit.resizeAd(player.currentWidth(), player.currentHeight(), player.isFullscreen() ? 'fullscreen' : 'normal');
+        }
+
+        adUnit.handshakeVersion('2.0', withTimeout(onHandShake, () => {
+          reject('Timeout while waiting for version handshake response');
+        }));
       }
 
-      const environmentVars = {
-        slot: vpaidContainerElement,
-        videoSlot: videoElement
-      };
+      const creative = tracker.creative;
 
-      adUnit.initAd(initialDimensions.width, initialDimensions.height, 'normal', -1, creativeData, environmentVars);
-    }
+      const vpaidMediaFile = creative.mediaFiles.find(mediaFile => mediaFile.apiFramework === 'VPAID' && validMime(mediaFile));
 
-    function onAdLoaded() {
-      adUnit.startAd();
-    }
-
-    function onAdStarted() {
-      player.trigger('ads-ad-started');
-      player.on('resize', resizeAd);
-      window.addEventListener('resize', resizeAd);
-      tracker.trackImpression();
-    }
-
-    function onAdStopped() {
-      vpaidClient.destroy();
-      player.controlBar.show();
-      player.off('resize', resizeAd);
-      window.removeEventListener('resize', resizeAd);
-      player.trigger('adended');
-      player.ads.endLinearAdMode();
-
-      if (options.vpaid.videoInstance === 'new' && videoElement.parentElement) {
-        videoElement.parentElement.removeChild(videoElement);
+      if (!vpaidMediaFile) {
+        throw new Error('Invalid VPAID media file: only JavaScript is supported');
       }
-    }
 
-    function onAdError(message) {
-      // TODO: review
-      console.log(`VPAID Error ${message}`);
-      try {
-        adUnit.stopAd();
-      } catch (ignore) {
+      const techScreen = player.el().querySelector('.vjs-tech');
+
+      container = findHtmlContainer(options);
+      if (!container) {
+        // ideally we want to create a fresh container element (no state attributes (i.e. 'data-ad-processed') or
+        // event listeners attached by previous ad)
+        container = createHtmlContainer(options);
+        containerIsFixed = false;
+      } else {
+        containerIsFixed = true;
       }
-    }
 
-    function resizeAd() {
-      const newDimensions = getPlayerDimensions(player);
+      containerAttributes = getAttributes(container);
 
-      adUnit.resizeAd(newDimensions.width, newDimensions.height, player.isFullscreen() ? 'fullscreen' : 'normal');
+      player.el().insertBefore(container, player.controlBar.el());
+
+      const vpaidClient = new VPAIDHTML5Client(container, techScreen, {});
+
+      vpaidClient.loadAdUnit(vpaidMediaFile.fileURL, onLoad);
+    });
+  }
+
+  // TODO: review. may not need.
+  cancel() {
+    this.#cancelled = true;
+    if (this.#started) {
+      this.#eventTarget.trigger('forceStopAd');
     }
   }
 }
 
-function getPlayerDimensions(player) {
-  let width = player.width();
-  let height = player.height();
+function validMime(mediaFile) {
+    return VALID_TYPES.indexOf(mediaFile.mimeType.trim()) > -1;
+}
 
-  if (player.isFullscreen()) {
-    width = window.innerWidth;
-    height = window.innerHeight;
+function createHtmlContainer(options) {
+    const containerId = options.vpaid.containerId;
+    const containerClass = options.vpaid.containerClass;
+
+    const vpaidContainerElement = document.createElement('div');
+
+    if (containerId) {
+      vpaidContainerElement.setAttribute('id', containerId);
+    }
+
+    if (containerClass) {
+      vpaidContainerElement.classList.add(containerClass);
+    }
+
+    return vpaidContainerElement;
+}
+
+
+function findHtmlContainer(options) {
+  const containerId = options.vpaid.containerId;
+  const containerClass = options.vpaid.containerClass;
+  let vpaidContainerElement = document.getElementById(containerId);
+
+  if (!vpaidContainerElement) {
+    vpaidContainerElement = document.getElementsByClassName(containerClass)[0];
   }
 
-  return {width, height};
+  return vpaidContainerElement;
+}
+
+/**
+ *
+ * @param {HTMLElement} element
+ * @return {{}}
+ */
+function getAttributes(element) {
+  const obj = {}
+  for (const attr of element.attributes) {
+    obj[attr.name] = attr.value;
+  }
+  return obj;
+}
+
+/**
+ *
+ * @param {function} handler
+ * @param {function()|null} timeoutFn
+ * @return {function(): void}
+ */
+
+function withTimeout(handler, timeoutFn = null) {
+  // TODO: configurable timeout
+  const id = setTimeout(() => {
+    handler = () => {
+    };
+    if (timeoutFn) {
+      timeoutFn();
+    }
+  }, 10000);
+
+  return function () {
+    clearTimeout(id);
+    handler.apply(null, arguments);
+  };
+}
+
+/**
+ * @param {object} adUnit
+ * @param {string} evtName
+ * @param {function} handler
+ * @param {function(Error)} timeoutFn
+ */
+function subscribeWithTimeout(adUnit, evtName, handler, timeoutFn) {
+  const fn = withTimeout(handler, () => {
+    if (timeoutFn) {
+      timeoutFn(new Error(`Timeout while waiting for ${evtName} event.`));
+    }
+  });
+
+  adUnit.subscribe(evtName, fn);
 }

@@ -35,12 +35,12 @@ It will look something like this:
 ```html
 <head>
     <!-- video.js framework -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.2.3/video-js.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.2.3/video.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.1/video-js.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.1/video.min.js"></script>
 
     <!-- Ads plugin for video.js -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.6.4/videojs.ads.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.6.4/videojs.ads.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.9.0/videojs.ads.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.9.0/videojs.ads.min.js"></script>
 
     <!-- This plugin for video.js -->
     <link href="http://where-you-host-the-plugin.com/videojsx.vast.css" rel="stylesheet">
