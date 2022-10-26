@@ -32,8 +32,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@dailymotion/vast-client": "^4.0.0",
-    "video.js": "^7.20.1",
+    "@dailymotion/vast-client": "^4.0.1",
+    "video.js": "^7.20.3",
     "videojs-contrib-ads": "^6.9.0",
     "vpaid-html5-client": "github:philipwatson/VPAIDHTML5Client#4d78886004aaf474f5fd2864c6f6edfab4a7f15e"
   },
