@@ -13,7 +13,7 @@ const devServerOptions = {
         directory: path.resolve(__dirname, "dev")
       },
       {
-        directory: path.resolve(__dirname, "test/creative")
+        directory: path.resolve(__dirname, "test/e2e/creative")
       }
     ],
     devMiddleware: {

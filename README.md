@@ -35,12 +35,12 @@ It will look something like this:
 ```html
 <head>
     <!-- video.js framework -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video-js.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.6.1/video-js.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.6.1/video.min.js"></script>
 
     <!-- Ads plugin for video.js -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.9.0/videojs.ads.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.9.0/videojs.ads.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.3.2/videojs.ads.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.3.2/videojs.ads.min.js"></script>
 
     <!-- This plugin for video.js -->
     <link href="http://where-you-host-the-plugin.com/videojsx.vast.css" rel="stylesheet">
@@ -84,17 +84,18 @@ Example:
 
 #### Options
 
-| Name              | Optional | Default | Description                                                                                    |
-|-------------------|----------|---------|------------------------------------------------------------------------------------------------|
-| `url`             | Yes      | n/a     | URL that responds with a VAST document                                                         | 
-| `xml`             | Yes      | n/a     | The VAST document. Use as an alternative to `url`. Can be a String or XMLDocument.             | 
-| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also. |          
-| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                        |          
-| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                           |          
-| `withCredentials` | Yes      | `true`  | Enable third-party cookies on the VAST request                                                 |
-| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                        |  
-| `companion`       | Yes      | `{}`    | See Companion options below                                                                    | 
-| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                        | 
+| Name              | Optional | Default | Description                                                                                                                                                                                                              |
+|-------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `url`             | Yes      | n/a     | URL that responds with a VAST XML ad tag. Can be an array of URLs to be used as fallbacks (Ad Waterfall) - if the first URL fails to get ads, then the next URL will be tried, and so on until a VAST with ads is found. | 
+| `xml`             | Yes      | n/a     | The VAST XML ad tag. Use as an alternative to `url`. Can be a String or XMLDocument.                                                                                                                                     | 
+| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.                                                                                                                           |          
+| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                                                                                                                                                  |          
+| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                                                                                                                                                     |          
+| `withCredentials` | Yes      | `true`  | Enable third-party cookies on the VAST request                                                                                                                                                                           |
+| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                                                                                                                                                  |  
+| `companion`       | Yes      | `{}`    | See Companion options below                                                                                                                                                                                              | 
+| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  | 
+| `schedule`        | Yes      | n/a     | An array of schedule items. If provided, the `url` and `xml` properties of this object will be ignored                                                                                                                   |
 
 ##### Companion Options
 
@@ -107,11 +108,27 @@ Example:
 
 ##### VPAID Options
 
-| Name             | Optional | Default                 | Description                                                                                         |
-|------------------|----------|-------------------------|-----------------------------------------------------------------------------------------------------|
-| `videoInstance`  | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
-| `containerId`    | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  | 
-| `containerClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          | 
+| Name               | Optional | Default                 | Description                                                                                         |
+|--------------------|----------|-------------------------|-----------------------------------------------------------------------------------------------------|
+| `videoInstance`    | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
+| `containerId`      | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  | 
+| `containerllClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          | 
+
+##### Schedule Item Options
+
+| Name     | Optional | Default | Description                                         |
+|----------|----------|---------|-----------------------------------------------------|
+| `url`    | Yes      | n/a     | Same as the `url` option on the top level           | 
+| `xml`    | Yes      | n/a     | Same as the `xml` option on the top level           | 
+| `offset` | Yes      | `'pre'` | When to play the ad tag. See possible values below. | 
+
+Offset values:
+* `pre`: (string) Play before the content (preroll).
+* `post`: (string) Play after the content (postroll).
+* number: (number or string) Play after the specified number of seconds. For example, `15`.
+* xx%: (string) Play after xx% of the content. For example, `75%`
+* time code: (string) Play at a specific time, in HH:MM:SS or HH:MM format. Examples: `1:30:12` (1 hour, 30 mins, 12 secs), `2:00` (2 hours), `0:25` (25 mins).
+
 
 ## Dev Workflow
 

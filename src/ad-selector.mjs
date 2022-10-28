@@ -1,4 +1,4 @@
-import {linearFn} from "./utils";
+import {linearFn} from "./utils.mjs";
 
 export class AdSelector {
   /**

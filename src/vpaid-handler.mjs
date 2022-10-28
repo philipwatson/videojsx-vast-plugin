@@ -1,8 +1,8 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
-import window from 'global/window';
-import document from 'global/document';
-import {once} from './utils';
-import {createVASTContext} from "./event";
+import window from 'global/window.js';
+import document from 'global/document.js';
+import {once} from './utils.mjs';
+import {createVASTContext} from "./event.mjs";
 
 const VALID_TYPES = ['application/x-javascript', 'text/javascript', 'application/javascript'];
 

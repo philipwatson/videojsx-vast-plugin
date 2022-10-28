@@ -1,7 +1,7 @@
 import window from "global";
-import {companionFn, linearFn} from "./utils";
+import {companionFn, linearFn} from "./utils.mjs";
 import {VASTClient, VASTParser, VASTTracker} from '@dailymotion/vast-client';
-import {TrackedAd} from "./tracked-ad";
+import {TrackedAd} from "./tracked-ad.mjs";
 
 export class AdLoader {
   #vastClient
@@ -23,22 +23,41 @@ export class AdLoader {
     this.#options = options;
   }
 
-  loadAds() {
+  loadAds(params = {}) {
     return new Promise((accept, reject) => {
-      const {url, xml} = this.#options;
+      const {url : urlConfig, xml} = params;
 
-      if (!url && !xml) {
-        throw new Error('xml or url option must be set');
+      const urls = (Array.isArray(urlConfig) ? urlConfig : [urlConfig])
+        .filter(url => url != null);
+
+      let promise;
+      if (urls.length) {
+        promise = Promise.resolve([]);
+        urls.forEach(url => {
+          promise = promise.then(ads => {
+            if (ads == null || ads.length === 0) {
+              return this.loadAdsWithUrl(url);
+            } else {
+              return ads;
+            }
+          }).catch(ignore => {
+            return [];
+          });
+        });
+      } else if (xml != null) {
+        promise = this.loadAdsWithXml(xml);
+      } else {
+        throw new Error('xml or url must be set');
       }
 
-      const ads = url ? this.loadAdsWithUrl(url) : this.loadAdsWithXml(xml);
-      ads.then(accept).catch(reject);
+      promise.then(accept).catch(reject);
     });
   }
 
   /**
    *
    * @param {XMLDocument|string} xml
+   * @return Promise<Array[TrackedAd]>
    */
   loadAdsWithXml(xml) {
     return new Promise((accept, reject) => {
@@ -47,7 +66,7 @@ export class AdLoader {
       if (xml.constructor === window.XMLDocument) {
         xmlDocument = xml;
       } else if (xml.constructor === String) {
-        xmlDocument = (new window.DOMParser()).parseFromString(xml, 'text/xml');
+        xmlDocument = (new window.DOMParser()).parseFromString(xml, 'application/xml');
       } else {
         throw new Error('xml config option must be a String or XMLDocument');
       }
@@ -66,7 +85,7 @@ export class AdLoader {
       this.#vastClient
         .get(url, {
           withCredentials: this.#options.withCredentials,
-          wrapperLimit: this.#options.wrapperLimit
+          wrapperLimit: this.#options.wrapperLimit,
         })
         .then(this.#adSelector.selectAds)
         .then(this.#createTrackedAds)

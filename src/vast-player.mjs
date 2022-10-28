@@ -3,7 +3,7 @@ import '!style-loader!css-loader!vast-player.css';
 
 import videojs from 'video.js';
 import 'videojs-contrib-ads';
-import 'vast-plugin';
+import 'vast-plugin.mjs';
 
 // eslint-disable-next-line no-undef
 window.videojs = videojs;

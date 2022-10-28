@@ -1,7 +1,7 @@
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const videoPlayerConfig = {
-    entry: {player: './src/vast-player.js'},
+    entry: {player: './src/vast-player.mjs'},
 
     output: {
         path: `${__dirname}/dist`,
@@ -19,13 +19,13 @@ const videoPlayerConfig = {
 
     resolve: {
         modules: ['src', 'node_modules'],
-        extensions: ['.js'],
+        extensions: ['.js', '.mjs'],
     },
 };
 
 const standalonePluginConfig = Object.assign({}, videoPlayerConfig, {
     entry: {
-        'videojsx.vast': ['./src/vast-plugin.js', './src/vast-player.css']
+        'videojsx.vast': ['./src/vast-plugin.mjs', './src/vast-player.css']
     },
     externals: {
         'video.js': 'videojs'
@@ -38,7 +38,7 @@ const standalonePluginConfig = Object.assign({}, videoPlayerConfig, {
     },
     plugins: [
       new MiniCssExtractPlugin()
-    ]
+    ],
 
 });
 

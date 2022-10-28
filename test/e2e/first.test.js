@@ -5,8 +5,11 @@ const cors = require('cors');
 const path = require("path");
 
 const GLOBALS = {
-  mediaFile: "video-960x540-5s.webm"
+  mediaFile: 'video-960x540-5s.webm'
 };
+
+const projectRoot = __dirname + '/../../'
+process.chdir(__dirname);
 
 async function setupPublisherServer(adserverPort) {
   const availablePort = await portfinder.getPortPromise();
@@ -18,15 +21,15 @@ async function setupPublisherServer(adserverPort) {
   app.engine('css', mustacheExpress());
 
   //app.set('view engine', 'html');
-  app.set('views',  path.resolve(".") + '/test/page');
+  app.set('views',  path.resolve(".") + '/page');
 
-  app.use(express.static('dist'));
+  app.use(express.static(projectRoot + '/dist'));
+
   app.get("/*", (req, res) => {
     const name = req.path.split('/').pop();
     if (name.toLowerCase().endsWith("css")) {
       res.type('css');
-    }
-    else {
+    } else {
       res.type('html');
     }
     res.render(name, { port: adserverPort })
@@ -58,18 +61,18 @@ async function setupAdvertServer() {
   app.engine('xml', mustacheExpress());
 
   app.set('view engine', 'xml');
-  app.set('views',  path.resolve(".") + '/test/vast');
+  app.set('views',  path.resolve('.') + '/vast');
 
-  app.get("/vast", (req, res) => {
+  app.get('/vast', (req, res) => {
     res.type('xml').render('sample01', { port: availablePort, mediaFile: GLOBALS.mediaFile })
   });
 
-  app.get("/track/*", (req, res) => {
+  app.get('/track/*', (req, res) => {
     res.send('');
   });
 
-  app.use('/creative', express.static( path.resolve(".") + '/test/creative'));
-  app.use('/page', express.static( path.resolve(".") + '/test/page'));
+  app.use('/creative', express.static( path.resolve('.') + '/creative'));
+  app.use('/page', express.static( path.resolve('.') + '/page'));
 
   return new Promise((res) => {
     const adServer = app.listen(availablePort, () => {
@@ -100,7 +103,7 @@ describe('Video player', () => {
   });
 
   beforeEach(async () => {
-    GLOBALS.mediaFile = "video-960x540-5s.webm";
+    GLOBALS.mediaFile = 'video-960x540-5s.webm';
   });
 
   it('should play preroll', async () => {
@@ -115,12 +118,12 @@ describe('Video player', () => {
     const result = await page.evaluate(() => window.test.playedSources);
 
     expect(result.length).toEqual(2);
-    expect(result[0]).toMatch("video-960x540-5s");
-    expect(result[1]).toMatch("big_buck_bunny_720p_surround");
+    expect(result[0]).toMatch('video-960x540-5s');
+    expect(result[1]).toMatch('big_buck_bunny_720p_surround');
   });
 
   it('should play content video when media file does not exist', async () => {
-    GLOBALS.mediaFile = "no-such-file-exists";
+    GLOBALS.mediaFile = 'no-such-file-exists';
 
     await page.goto(`http://localhost:${pubPort}/index.html`);
 
@@ -133,7 +136,7 @@ describe('Video player', () => {
     const result = await page.evaluate(() => window.test.playedSources);
 
     expect(result.length).toEqual(1);
-    expect(result[0]).toMatch("big_buck_bunny_720p_surround");
+    expect(result[0]).toMatch('big_buck_bunny_720p_surround');
   });
 
   async function waitForVideo() {

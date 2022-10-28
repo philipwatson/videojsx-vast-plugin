@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Schedule Example</title>
+</head>
+
+<body>
+
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
+    <!-- Thank you, Mozilla -->
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video -->
+    <source id ="mysrc" src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" type="video/mp4">
+    Your browser does not support video.
+</video>
+<div id="companion"></div>
+
+<script src="http://localhost:9999/bundle/player.js"></script>
+
+<script>
+  var player = videojs('vid1');
+
+  // language=XML
+  player.vast({
+    schedule: [
+      {
+        offset: 'pre',
+        url: 'http://localhost:9999/vast.xml?comment=pre',
+      },
+      {
+        offset: '75%',
+        url: 'http://localhost:9999/vast.xml?comment=mid',
+      },
+      {
+        offset: 'post',
+        url: 'http://localhost:9999/vast.xml?comment=post',
+      }
+    ],
+    skip: 3
+  });
+</script>
+
+</body>
+</html>

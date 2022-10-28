@@ -1,11 +1,13 @@
 import videojs from 'video.js';
 import {VASTClient, VASTParser} from '@dailymotion/vast-client';
-import document from 'global/document';
-import {UI} from './ui';
-import {AdLoader} from './ad-loader';
-import {AdSelector} from './ad-selector';
-import {VPAIDHandler} from './vpaid-handler';
-import {createVASTContext} from "./event";
+import document from 'global/document.js';
+import {UI} from './ui.mjs';
+import {AdLoader} from './ad-loader.mjs';
+import {AdSelector} from './ad-selector.mjs';
+import {VPAIDHandler} from './vpaid-handler.mjs';
+import {createVASTContext} from "./event.mjs";
+import {once, cloneJson, convertOffsetToSeconds} from "./utils.mjs";
+
 const Plugin = videojs.getPlugin('plugin');
 
 const DEFAULT_OPTIONS = Object.freeze({
@@ -44,9 +46,13 @@ class VastPlugin extends Plugin {
       player.ads({debug: false, liveCuePoints: false});
     }
 
+    player.on('play', function() {
+      console.log('play event triggered');
+    });
+
     console.log(`videojsx-vast-plugin running`);
 
-    options = videojs.mergeOptions(DEFAULT_OPTIONS, options || {});
+    options = videojs.obj.merge(DEFAULT_OPTIONS, options || {});
 
     /** @type {VASTClient} */
     const vastClient = new VASTClient();
@@ -55,15 +61,36 @@ class VastPlugin extends Plugin {
     /** @type {TrackedAd|null} */
     let currentAd = null;
     /** @type {Number} */
-    let currentAdIndex = -1;
+    let adCount = 0;
+    /** @type {Number} */
+    let adTotal = 0;
     /** @type {VPAIDHandler} */
     const vpaidHandler = new VPAIDHandler(player, options);
     /** @type {boolean} */
     let timedOut = false;
 
+    let schedule = options.schedule;
+    if (schedule == null || schedule.length === 0) {
+      schedule = [
+        {
+          offset: 0,
+          url: options.url || null,
+          xml: options.xml || null
+        }
+      ]
+    } else {
+      schedule = cloneJson(schedule);
+      schedule.forEach(item => delete item.offsetInSeconds);
+    }
+
+    const preRollScheduleItem = findFirstPreroll(schedule);
+    const postRollScheduleItem = findFirstPostroll(schedule);
+    const midRollScheduleItems = findAllMidrolls(schedule).sort((a, b) => a.offset - b.offset);
+
     const autoplay = player.autoplay();
 
     player.on('adtimeout', () => {
+      // failed to show an ad on time when in the "play" state
       timedOut = true;
     });
 
@@ -85,31 +112,120 @@ class VastPlugin extends Plugin {
       currentAd.linearAdTracker.click();
     });
 
-    player.on('readyforpreroll', () => {
-      startPreRoll();
+    const onTimeUpdate = (() => {
+      let lock = false;
+      return () => {
+        if (lock) return;
+
+        let offsetInSeconds = null;
+        while (midRollScheduleItems.length > 0) {
+          offsetInSeconds = midRollScheduleItems[0].offsetInSeconds;
+          if (offsetInSeconds != null) {
+            break;
+          }
+          const {offset} = midRollScheduleItems[0];
+          offsetInSeconds = convertOffsetToSeconds(offset, player.duration());
+          if (offsetInSeconds == null) {
+            midRollScheduleItems.shift();
+          } else {
+            midRollScheduleItems[0].offsetInSeconds = offsetInSeconds;
+          }
+        }
+
+        if (offsetInSeconds != null) {
+          if (this.player.currentTime() > offsetInSeconds) {
+            lock = true;
+            const scheduleItem = midRollScheduleItems.shift();
+            adLoader.loadAds(scheduleItem)
+              .then(trackedAds => {
+                if (trackedAds.length > 0) {
+                  ads.push(...trackedAds);
+                  currentAd = null;
+                  startAdBreak();
+                }
+              })
+              .catch(err => {
+                // eslint-disable-next-line no-console
+                console.log(`An error occurred when loading ads for the midroll ad break: : ${err?.message}`);
+              })
+              .finally(() => {
+                lock = false;
+              });
+          }
+        }
+      }
+    })();
+
+    if (midRollScheduleItems.length > 0) {
+      player.on('timeupdate', onTimeUpdate);
+    }
+
+    player.on('readyforpostroll', () => {
+      timedOut = false;
+      adLoader.loadAds(postRollScheduleItem)
+        .then(trackedAds => {
+          if (timedOut) {
+            trackedAds.forEach(ad => {
+              ad.linearAdTracker.error({
+                ERRORCODE: 301 // VAST redirect timeout reached
+              });
+            })
+          }
+          else if (trackedAds.length > 0) {
+            ads.push(...trackedAds);
+            currentAd = null;
+            startAdBreak();
+          }
+          else {
+            player.trigger('nopostroll');
+          }
+        })
+        .catch(err => {
+          // eslint-disable-next-line no-console
+          console.log(`An error occurred when loading ads for the postroll ad break: : ${err.message}`);
+          player.trigger('nopostroll');
+        })
     });
 
+    player.on('readyforpreroll', () => {
+      startAdBreak();
+    });
+
+    const signalAdsReady = once(() => {
+      // Can only signal 'adsready' in Preroll and BeforePreroll states (in videojs-contrib-ads).
+      // So we need to signal even when we have no pre-rolls - because we may get mid or post rolls later.
+      player.trigger('adsready');
+    })
+
+    // TODO: calculate reasonable timeout based on contrib-ads settings
+    setTimeout(signalAdsReady, 3000);
+
     const adLoader = new AdLoader(vastClient, new VASTParser(), new AdSelector(), options);
-    adLoader.loadAds()
+    adLoader.loadAds(preRollScheduleItem)
       .then(trackedAds => {
-        // TODO: document this timeout
-        if (!timedOut) {
+        if (timedOut) {
+          trackedAds.forEach(ad => {
+            ad.linearAdTracker.error({
+              ERRORCODE: 301 // VAST redirect timeout reached
+            });
+          })
+        }
+        else if (trackedAds.length > 0) {
           ads.push(...trackedAds);
           currentAd = null;
-          player.trigger('adsready');
+          // do not start ad break here
         }
         else {
-          // avoid interrupting content playback
-          // TODO: option to allow this interruption
-          throw new Error('Ad load took too long.');
+          player.trigger('nopreroll');
         }
       })
       .catch(err => {
         // eslint-disable-next-line no-console
-        console.log(`Ad cancelled: ${err.message}`);
+        console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
         player.trigger('nopreroll');
       })
       .finally(() => {
+        signalAdsReady();
         if (autoplay) {
           player.play();
         }
@@ -128,7 +244,7 @@ class VastPlugin extends Plugin {
     }
 
     const playNextAd = () => {
-      const nextAd = ads[currentAdIndex + 1];
+      const nextAd = ads.shift();
 
       // do not change ui for vpaid
       if (nextAd?.hasVideoMedia()) {
@@ -143,8 +259,8 @@ class VastPlugin extends Plugin {
 
       if (nextAd) {
         currentAd = nextAd;
-        currentAdIndex++;
-        console.log(`Playing ad ${currentAdIndex + 1}/${ads.length}`);
+        adCount++;
+        console.log(`Playing ad ${adCount}/${adTotal}`);
 
         if (currentAd.hasVideoMedia()) {
           const allMediaFiles = currentAd.linearCreative.mediaFiles;
@@ -182,8 +298,8 @@ class VastPlugin extends Plugin {
         showCompanionAd();
       } else {
         currentAd = null;
-        currentAdIndex = -1;
-        endPreRoll();
+        adCount = 0;
+        endAdBreak();
       }
     }
 
@@ -326,14 +442,35 @@ class VastPlugin extends Plugin {
       }
     }
 
-    const startPreRoll = () => {
-      console.log(`Playing ${ads.length} ads`);
+    const startAdBreak = () => {
+      adTotal = ads.length;
+      console.log(`Playing ${adTotal} ads`);
       player.ads.startLinearAdMode();
       setUpEvents();
       playNextAd();
     }
 
-    const endPreRoll = () => {
+    function isPreroll(scheduleItem) {
+      return scheduleItem.offset === 0 || scheduleItem.offset == null || scheduleItem.offset === 'pre'
+    }
+
+    function isPostroll(scheduleItem) {
+      return scheduleItem.offset === 'post';
+    }
+
+    function findFirstPreroll(schedule) {
+      return schedule.find(isPreroll);
+    }
+
+    function findFirstPostroll(schedule) {
+      return schedule.find(isPostroll);
+    }
+
+    function findAllMidrolls(schedule) {
+      return schedule.filter(item => !isPreroll(item) && !isPostroll(item));
+    }
+
+    const endAdBreak = () => {
       player.ads.endLinearAdMode();
       tearDownEvents();
       console.log('Playing content');
