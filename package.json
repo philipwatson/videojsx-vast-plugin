@@ -40,7 +40,7 @@
   "devDependencies": {
     "@babel/core": "^7.18.10",
     "@babel/preset-env": "^7.18.10",
-    "babel-loader": "^8.2.5",
+    "babel-loader": "^8.3.0",
     "compression-webpack-plugin": "^10.0.0",
     "cors": "^2.8.5",
     "css-loader": "^6.7.1",
