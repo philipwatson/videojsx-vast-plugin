@@ -47,6 +47,7 @@ export class VPAIDHandler {
         const onAdComplete = () => {
           cleanUp();
           resolve();
+          player.trigger('vpaid.AdStopped');
         };
 
         adUnit.subscribe('AdStopped', onAdComplete);
@@ -58,6 +59,7 @@ export class VPAIDHandler {
               this.#forceStopDone = true;
               cleanUp();
               reject(err);
+              player.trigger('vpaid.AdStopped');
             };
             subscribeWithTimeout(adUnit, 'AdStopped', onAdCancel, onAdCancel);
             adUnit.stopAd();
@@ -76,6 +78,7 @@ export class VPAIDHandler {
           this.#forceStopDone = true;
           cleanUp();
           reject(`Fatal VPAID Error: ${typeof message === 'object' ? JSON.stringify(message) : message}`);
+          player.trigger('vpaid.AdError', message);
         });
 
         if (this.#cancelled) {
@@ -174,6 +177,7 @@ export class VPAIDHandler {
 
           adUnit.subscribe('AdSkipped', () => {
             tracker.skip();
+            player.trigger('vpaid.AdSkipped');
           });
 
           adUnit.subscribe('AdVolumeChange', () => {
@@ -188,12 +192,14 @@ export class VPAIDHandler {
               }
 
               player.volume(currentVolume);
+              player.trigger('vpaid.AdVolumeChange');
             });
           });
 
           adUnit.subscribe('AdImpression', () => {
             // will also trigger createView
             tracker.trackImpression();
+            player.trigger('vpaid.AdImpression');
           });
 
 
@@ -212,43 +218,53 @@ export class VPAIDHandler {
               }
               // The url here is a fallback - the tracker will use VAST click url if it exists.
               tracker.click(url);
+              player.trigger('vpaid.AdClickThru');
             }
           );
 
           adUnit.subscribe('AdVideoFirstQuartile', () => {
             tracker.track('firstQuartile');
+            player.trigger('vpaid.AdVideoFirstQuartile');
           });
 
           adUnit.subscribe('AdVideoMidpoint', () => {
             tracker.track('midpoint');
+            player.trigger('vpaid.AdVideoMidpoint');
           });
 
           adUnit.subscribe('AdVideoThirdQuartile', () => {
             tracker.track('thirdQuartile');
+            player.trigger('vpaid.AdVideoThirdQuartile');
           });
 
           adUnit.subscribe('AdVideoComplete', () => {
             tracker.track('complete');
+            player.trigger('vpaid.AdVideoComplete');
           });
 
           adUnit.subscribe('AdUserAcceptInvitation', () => {
             tracker.acceptInvitation();
+            player.trigger('vpaid.AdUserAcceptInvitation');
           });
 
           adUnit.subscribe('AdUserMinimize', () => {
             tracker.minimize();
+            player.trigger('vpaid.AdUserMinimize');
           });
 
           adUnit.subscribe('AdUserClose', () => {
             tracker.close();
+            player.trigger('vpaid.AdUserClose');
           });
 
           adUnit.subscribe('AdPaused', () => {
             tracker.setPaused(true);
+            player.trigger('vpaid.AdPaused');
           });
 
           adUnit.subscribe('AdPlaying', () => {
             tracker.setPaused(false);
+            player.trigger('vpaid.AdPlaying');
           });
 
           adUnit.getAdLinear(withTimeout((err, isLinear) => {
