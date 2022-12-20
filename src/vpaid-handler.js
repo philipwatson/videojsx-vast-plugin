@@ -2,6 +2,7 @@ import VPAIDHTML5Client from 'vpaid-html5-client';
 import window from 'global/window';
 import document from 'global/document';
 import {once} from './utils';
+import {createVASTContext} from "./event";
 
 const VALID_TYPES = ['application/x-javascript', 'text/javascript', 'application/javascript'];
 
@@ -48,6 +49,10 @@ export class VPAIDHandler {
           cleanUp();
           resolve();
           player.trigger('vpaid.AdStopped');
+          player.trigger({
+            type: 'vast.adEnd',
+            vast: createVASTContext(tracker)
+          })
         };
 
         adUnit.subscribe('AdStopped', onAdComplete);
@@ -178,6 +183,10 @@ export class VPAIDHandler {
           adUnit.subscribe('AdSkipped', () => {
             tracker.skip();
             player.trigger('vpaid.AdSkipped');
+            player.trigger({
+              type: 'vast.adSkip',
+              vast: createVASTContext(tracker)
+            })
           });
 
           adUnit.subscribe('AdVolumeChange', () => {
@@ -301,7 +310,11 @@ export class VPAIDHandler {
             this.#started = true
             tracker.track('start');
             player.on('playerresize', resizeAd);
-            player.trigger('ads-ad-started');
+            player.trigger('ads-ad-started'); // notify videojs-contrib-ads
+            player.trigger({
+              type: 'vast.adStart',
+              vast: createVASTContext(tracker)
+            });
           } else {
             forceStopAd('Received cancel signal');
           }

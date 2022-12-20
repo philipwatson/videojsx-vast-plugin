@@ -39,4 +39,12 @@ export class TrackedAd {
   set skipAfterDuration(value) {
     this.#skipAfterDuration = value;
   }
+
+  /**
+   *
+   * @return {boolean}
+   */
+  hasVideoMedia() {
+    return this.linearCreative.mediaFiles.some(mediaFile => mediaFile && mediaFile.apiFramework == null);
+  }
 }
