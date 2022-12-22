@@ -83,7 +83,7 @@ export class VPAIDHandler {
           this.#forceStopDone = true;
           cleanUp();
           reject(`Fatal VPAID Error: ${typeof message === 'object' ? JSON.stringify(message) : message}`);
-          player.trigger('vpaid.AdError', message);
+          player.trigger({type: 'vpaid.AdError', error: message});
         });
 
         if (this.#cancelled) {
