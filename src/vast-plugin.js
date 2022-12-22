@@ -63,10 +63,6 @@ class VastPlugin extends Plugin {
 
     const autoplay = player.autoplay();
 
-    if (autoplay) {
-      player.autoplay(false);
-    }
-
     player.on('adtimeout', () => {
       timedOut = true;
     });
