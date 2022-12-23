@@ -36,8 +36,12 @@ export class VPAIDHandler {
       let containerAttributes = {};
       let containerIsFixed = false;
 
-
-      const onLoad = (err, adUnit) => {
+      /**
+       * "timeout" | Error
+       * @param {string|Error} err
+       * @param adUnit
+       */
+      const adUnitLoad = (err, adUnit) => {
         let videoElement;
 
         if (err) {
@@ -77,21 +81,12 @@ export class VPAIDHandler {
 
         this.#eventTarget.on('forceStopAd', forceStopAd);
 
-        adUnit.subscribe('AdError', message => {
-          // General VPAID Error = 901 (in VAST 3 spec)
-          tracker.error({ERRORCODE: 901});
-          this.#forceStopDone = true;
-          cleanUp();
-          reject(`Fatal VPAID Error: ${typeof message === 'object' ? JSON.stringify(message) : message}`);
-          player.trigger({type: 'vpaid.AdError', error: message});
-        });
-
         if (this.#cancelled) {
           forceStopAd('Received cancel signal from player');
           return;
         }
 
-        const cleanUp = () => {
+        function cleanUp() {
           player.controlBar.show();
 
           player.off('playerresize', resizeAd);
@@ -170,6 +165,15 @@ export class VPAIDHandler {
           subscribeWithTimeout(adUnit, 'AdLoaded', onAdLoaded, forceStopAd);
 
           const viewMode = player.isFullscreen() ? 'fullscreen' : 'normal';
+
+          adUnit.subscribe('AdError', message => {
+            // General VPAID Error = 901 (in VAST 3 spec)
+            tracker.error({ERRORCODE: 901});
+            this.#forceStopDone = true;
+            cleanUp();
+            reject(`Fatal VPAID Error: ${typeof message === 'object' ? JSON.stringify(message) : message}`);
+            player.trigger({type: 'vpaid.AdError', error: message});
+          });
 
           adUnit.initAd(player.currentWidth(), player.currentHeight(), viewMode, -1, creativeData, environmentVars);
         }
@@ -355,7 +359,7 @@ export class VPAIDHandler {
 
       const vpaidClient = new VPAIDHTML5Client(container, techScreen, {});
 
-      vpaidClient.loadAdUnit(vpaidMediaFile.fileURL, onLoad);
+      vpaidClient.loadAdUnit(vpaidMediaFile.fileURL, adUnitLoad);
     });
   }
 
