@@ -328,9 +328,8 @@ export class VPAIDHandler {
           adUnit.resizeAd(player.currentWidth(), player.currentHeight(), player.isFullscreen() ? 'fullscreen' : 'normal');
         }
 
-        adUnit.handshakeVersion('2.0', withTimeout(onHandShake, () => {
-          reject('Timeout while waiting for version handshake response');
-        }));
+        // not async so no timeout is required
+        adUnit.handshakeVersion('2.0', onHandShake);
       }
 
       const creative = tracker.creative;
