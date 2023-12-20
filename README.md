@@ -1,7 +1,7 @@
 # videojsx-vast-plugin
 
 
-Initially, the code was taken from [videojs-vast-plugin](https://github.com/theonion/videojs-vast-plugin) and made it work with videojs 7.
+Initially, the code was taken from [videojs-vast-plugin](https://github.com/theonion/videojs-vast-plugin) and made it work with videojs 8.
 It is very different now.
 
 This project intends to keep up to date with the videojs and its other dependencies.
