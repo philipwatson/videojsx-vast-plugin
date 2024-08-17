@@ -52,7 +52,8 @@ class VastPlugin extends Plugin {
 
     console.log(`videojsx-vast-plugin running`);
 
-    options = videojs.obj.merge(DEFAULT_OPTIONS, options || {});
+    const mergeOptionsFunction = parseInt(videojs.VERSION, 10) >= 8 ? videojs.obj.merge : videojs.mergeOptions;
+    options = mergeOptionsFunction(DEFAULT_OPTIONS, options || {});
 
     /** @type {VASTClient} */
     const vastClient = new VASTClient();
