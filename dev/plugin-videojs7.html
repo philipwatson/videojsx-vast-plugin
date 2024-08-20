@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plugin Example</title>
+
+    <!-- video.js framework -->
+    <link href="https://cdn.jsdelivr.net/npm/video.js@7.21.6/dist/video-js.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/video.js@7.21.6/dist/video.min.js"></script>
+
+    <!-- Ads plugin for video.js -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/6.9.0/videojs.ads.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-ads@6.9.0/dist/videojs.ads.min.js"></script>
+
+    <!-- This plugin for video.js -->
+    <link href="http://localhost:9999/bundle/videojsx.vast.css" rel="stylesheet">
+    <script src="http://localhost:9999/bundle/videojsx.vast.js"></script>
+</head>
+
+<body>
+
+<!-- 'Big Buck Bunny' licensed under CC 3.0 by the Blender foundation. Hosted by archive.org -->
+<!-- Poster from peach.blender.org -->
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
+    <source id ="mysrc" src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4" type="video/mp4">
+    Your browser does not support video.
+</video>
+<div id="companion"></div>
+
+<script>
+  var player = videojs('vid1');
+
+  var companion = {
+    elementId: "companion",
+    maxWidth: 300,
+    maxHeight: 250
+  };
+
+  player.vast({url: 'http://localhost:9999/vast.xml', skip: 8, companion: companion});
+</script>
+
+</body>
+
+</html>
