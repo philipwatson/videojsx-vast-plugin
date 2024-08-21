@@ -16,6 +16,8 @@ const DEFAULT_OPTIONS = Object.freeze({
   wrapperLimit: 10,
   withCredentials: true,
   skip: 0,
+  displayRemainingTime: false,
+  displayRemainingTimeIcons: false,
   vpaid: {
     containerId: undefined,
     containerClass: 'vjs-vpaid-container',

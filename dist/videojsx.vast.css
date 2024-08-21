@@ -27,6 +27,40 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
     background: #333;
 }
 
+.vast-remaining-time {
+    display: block;
+    position: absolute;
+    bottom: 35px;
+    left: 75px;
+    width: auto;
+    color: #aaa;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 12px;
+    z-index: 2;
+}
+
+.vast-remaining-time-icon {
+    position: absolute;
+    color: #aaa !important;
+    font-size: 20px !important;
+    z-index: 2;
+}
+
+.vast-remaining-time-icon:focus {
+    text-shadow: 0 0 1em #fff;
+}
+
+.vast-remaining-time-icon-play {
+    bottom: 30px;
+    left: 8px;
+}
+
+.vast-remaining-time-icon-mute {
+    bottom: 30px;
+    left: 40px;
+}
+
 .vast-blocker {
     display: block;
     position: absolute;
