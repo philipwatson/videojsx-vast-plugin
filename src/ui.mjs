@@ -62,9 +62,63 @@ export class UI extends videojs.EventTarget {
       };
     }
 
+    const setupRemainingTime = () => {
+      if (!options.displayRemainingTime) return;
+
+      const remainingTimeElement = this.remainingTimeElement = window.document.createElement('div');
+      remainingTimeElement.className = 'vast-remaining-time';
+      remainingTimeElement.style.display = 'none';
+
+      player.el().appendChild(remainingTimeElement);
+    }
+
+    const setupRemainingTimeIcon = (type) => {
+      if (!options.displayRemainingTimeIcons) return;
+
+      const config = {
+        play: {
+          className: 'vjs-icon-play vast-remaining-time-icon-play',
+          action: (player) => player.paused() ? player.play() : player.pause(),
+          toggleClasses: ['vjs-icon-pause', 'vjs-icon-play'],
+          events: ['adplay', 'adpause'],
+          initialState: (player) => player.paused() ? 'vjs-icon-play' : 'vjs-icon-pause'
+        },
+        mute: {
+          className: 'vast-remaining-time-icon-mute',
+          action: (player) => player.muted(!player.muted()),
+          toggleClasses: ['vjs-icon-volume-high', 'vjs-icon-volume-mute'],
+          events: ['advolumechange'],
+          initialState: (player) => player.muted() ? 'vjs-icon-volume-mute' : 'vjs-icon-volume-high'
+        }
+      };
+
+      const { className, action, toggleClasses, events, initialState } = config[type];
+
+      const button = player.addChild('button', {
+        className: `vjs-hidden vjs-visible-text vjs-button vast-remaining-time-icon ${className}`,
+        clickHandler: function() {
+          action(this.player);
+        }.bind(this),
+      });
+
+      button.removeClass('vjs-control');
+      button.addClass(initialState(player));
+
+      const toggleIcon = () => {
+        toggleClasses.forEach(cls => button.toggleClass(cls));
+      };
+
+      this[`remainingTime${type.charAt(0).toUpperCase() + type.slice(1)}Element`] = button.el();
+
+      events.forEach(event => player.on(event, toggleIcon));
+    };
+
     setupProgressControl();
     setupBlocker();
     setupSkipButton();
+    setupRemainingTime();
+    setupRemainingTimeIcon('play');
+    setupRemainingTimeIcon('mute');
   }
 
   tearDown() {
@@ -82,6 +136,15 @@ export class UI extends videojs.EventTarget {
     this.blocker.parentElement.removeChild(this.blocker);
     this.skipButtonElement.parentElement.removeChild(this.skipButtonElement);
 
+    if (this.options.displayRemainingTime) {
+      this.remainingTimeElement.parentElement.removeChild(this.remainingTimeElement);
+    }
+
+    if (this.options.displayRemainingTimeIcons) {
+      this.remainingTimePlayElement.parentElement.removeChild(this.remainingTimePlayElement);
+      this.remainingTimeMuteElement.parentElement.removeChild(this.remainingTimeMuteElement);
+    }
+
     player.off('adtimeupdate', this.#onTimeUpdate);
     player.off('adplay', this.#onAdPlay);
   }
@@ -91,6 +154,16 @@ export class UI extends videojs.EventTarget {
     const player = this.player;
     if (skip > 0 && (player.duration() || this.duration) >= skip) {
       this.skipButtonElement.style.display = 'block';
+
+      if (this.options.displayRemainingTime) {
+        this.remainingTimeElement.style.display = 'block';
+      }
+
+      if (this.options.displayRemainingTimeIcons) {
+        this.remainingTimePlayElement.classList.remove('vjs-hidden');
+        this.remainingTimeMuteElement.classList.remove('vjs-hidden');
+      }
+
       player.on('adtimeupdate', this.#onTimeUpdate);
     }
     player.loadingSpinner.el().style.display = 'none';
@@ -100,6 +173,11 @@ export class UI extends videojs.EventTarget {
     this.player.loadingSpinner.el().style.display = 'none';
 
     const timeLeft = Math.ceil(this.options.skip - this.player.currentTime());
+
+    if (this.options.displayRemainingTime) {
+      const remainingTimeLeft = Math.ceil(this.player.remainingTime());
+      this.remainingTimeElement.innerHTML = `This ad will end in ${remainingTimeLeft}`;
+    }
 
     if (timeLeft > 0) {
       disableSkip(this.skipButtonElement);

@@ -19,8 +19,8 @@ The build creates two independent artifacts in the `dist/` folder:
 |---------------|-------------------------------------|--------------------------------------------------------------------------|
 | Plugin        | videojsx.vast.js, videojsx.vast.css | Standalone plugin that can be integrated to an external video.js player. |
 | Video Player  | player.js                           | A file that has video.js, css and other dependencies bundled in.         |
- 
-Also, every JavaScript `.js` file has a compressed version `.js.gz` 
+
+Also, every JavaScript `.js` file has a compressed version `.js.gz`
 
 ## Usage
 
@@ -86,41 +86,43 @@ Example:
 
 | Name              | Optional | Default | Description                                                                                                                                                                                                              |
 |-------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `url`             | Yes      | n/a     | URL that responds with a VAST XML ad tag. Can be an array of URLs to be used as fallbacks (Ad Waterfall) - if the first URL fails to get ads, then the next URL will be tried, and so on until a VAST with ads is found. | 
-| `xml`             | Yes      | n/a     | The VAST XML ad tag. Use as an alternative to `url`. Can be a String or XMLDocument.                                                                                                                                     | 
-| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.                                                                                                                           |          
-| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                                                                                                                                                  |          
-| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                                                                                                                                                     |          
+| `url`             | Yes      | n/a     | URL that responds with a VAST XML ad tag. Can be an array of URLs to be used as fallbacks (Ad Waterfall) - if the first URL fails to get ads, then the next URL will be tried, and so on until a VAST with ads is found. |
+| `xml`             | Yes      | n/a     | The VAST XML ad tag. Use as an alternative to `url`. Can be a String or XMLDocument.                                                                                                                                     |
+| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.                                                                                                                           |
+| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                                                                                                                                                  |
+| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                                                                                                                                                     |
 | `withCredentials` | Yes      | `true`  | Enable third-party cookies on the VAST request                                                                                                                                                                           |
-| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                                                                                                                                                  |  
-| `companion`       | Yes      | `{}`    | See Companion options below                                                                                                                                                                                              | 
-| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  | 
+| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                                                                                                                                                  |
+| `displayRemainingTime` | Yes      | `false` | Display the remaining time until the ad ends |
+| `displayRemainingTimeIcons` | Yes      | `false` | Display play/pause and mute/unmute icons before the remaining time message |
+| `companion`       | Yes      | `{}`    | See Companion options below                                                                                                                                                                                              |
+| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  |
 | `schedule`        | Yes      | n/a     | An array of schedule items. If provided, the `url` and `xml` properties of this object will be ignored                                                                                                                   |
 
 ##### Companion Options
 
 | Name        | Optional | Default | Description                                                      |
 |-------------|----------|---------|------------------------------------------------------------------|
-| `elementId` | Yes      | `null`  | Id of the HTML element that will serve as the creative container | 
-| `maxWidth`  | Yes      | `0`     | The maximum width allowed for the creative                       | 
-| `maxHeight` | Yes      | `0`     | The maximum height allowed for the creative                      | 
+| `elementId` | Yes      | `null`  | Id of the HTML element that will serve as the creative container |
+| `maxWidth`  | Yes      | `0`     | The maximum width allowed for the creative                       |
+| `maxHeight` | Yes      | `0`     | The maximum height allowed for the creative                      |
 
 
 ##### VPAID Options
 
 | Name               | Optional | Default                 | Description                                                                                         |
 |--------------------|----------|-------------------------|-----------------------------------------------------------------------------------------------------|
-| `videoInstance`    | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. | 
-| `containerId`      | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  | 
-| `containerllClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          | 
+| `videoInstance`    | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. |
+| `containerId`      | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  |
+| `containerllClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          |
 
 ##### Schedule Item Options
 
 | Name     | Optional | Default | Description                                         |
 |----------|----------|---------|-----------------------------------------------------|
-| `url`    | Yes      | n/a     | Same as the `url` option on the top level           | 
-| `xml`    | Yes      | n/a     | Same as the `xml` option on the top level           | 
-| `offset` | Yes      | `'pre'` | When to play the ad tag. See possible values below. | 
+| `url`    | Yes      | n/a     | Same as the `url` option on the top level           |
+| `xml`    | Yes      | n/a     | Same as the `xml` option on the top level           |
+| `offset` | Yes      | `'pre'` | When to play the ad tag. See possible values below. |
 
 Offset values:
 * `pre`: (string) Play before the content (preroll).
@@ -133,7 +135,7 @@ Offset values:
 ## Dev Workflow
 
 ### Setup
-This project uses LFS for versioning large files (e.g., mp4). Only useful for development. 
+This project uses LFS for versioning large files (e.g., mp4). Only useful for development.
 Please see [Git Large File Storage](https://git-lfs.github.com/) on github for details.
 
 Example setup for Mac OS:
@@ -150,14 +152,14 @@ git lfs fetch
 ```
 
 ### Workflow
-Run `npm start` brings up a development server at port 9999 with automatic background builds. 
+Run `npm start` brings up a development server at port 9999 with automatic background builds.
 
 The page is http://localhost:9999/index.html
 
 The command should automatically open this page.
 
-The build will be triggered when any of the files under `src/` is modified. The currently opened page on port 9999 
-should reload automatically. 
+The build will be triggered when any of the files under `src/` is modified. The currently opened page on port 9999
+should reload automatically.
 
 
 ## Testing
