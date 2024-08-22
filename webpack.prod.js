@@ -24,6 +24,9 @@ module.exports = common.map(c => merge(c, {
                     format: {
                         comments: false,
                     },
+                    compress: {
+                        drop_console: true,
+                    },
                 },
                 extractComments: false,
             }),
