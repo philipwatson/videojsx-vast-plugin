@@ -176,15 +176,15 @@ export class UI extends videojs.EventTarget {
 
     if (this.options.displayRemainingTime) {
       const remainingTimeLeft = Math.ceil(this.player.remainingTime());
-      this.remainingTimeElement.innerHTML = `This ad will end in ${remainingTimeLeft}`;
+      this.remainingTimeElement.innerHTML = this.options.messages.remainingTime.replace('{seconds}', remainingTimeLeft);
     }
 
     if (timeLeft > 0) {
       disableSkip(this.skipButtonElement);
-      this.skipButtonElement.innerHTML = 'Skip in ' + timeLeft + '...';
+      this.skipButtonElement.innerHTML = this.options.messages.skipCountdown.replace('{seconds}', timeLeft);
     } else {
       enableSkip(this.skipButtonElement);
-      this.skipButtonElement.innerHTML = 'Skip';
+      this.skipButtonElement.innerHTML = this.options.messages.skip;
     }
   }
 }
