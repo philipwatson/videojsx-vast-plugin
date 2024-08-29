@@ -84,20 +84,30 @@ Example:
 
 #### Options
 
-| Name              | Optional | Default | Description                                                                                                                                                                                                              |
-|-------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `url`             | Yes      | n/a     | URL that responds with a VAST XML ad tag. Can be an array of URLs to be used as fallbacks (Ad Waterfall) - if the first URL fails to get ads, then the next URL will be tried, and so on until a VAST with ads is found. |
-| `xml`             | Yes      | n/a     | The VAST XML ad tag. Use as an alternative to `url`. Can be a String or XMLDocument.                                                                                                                                     |
-| `seekEnabled`     | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.                                                                                                                           |
-| `controlsEnabled` | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                                                                                                                                                  |
-| `wrapperLimit`    | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                                                                                                                                                     |
-| `withCredentials` | Yes      | `true`  | Enable third-party cookies on the VAST request                                                                                                                                                                           |
-| `skip`            | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                                                                                                                                                  |
-| `displayRemainingTime` | Yes      | `false` | Display the remaining time until the ad ends |
-| `displayRemainingTimeIcons` | Yes      | `false` | Display play/pause and mute/unmute icons before the remaining time message |
-| `companion`       | Yes      | `{}`    | See Companion options below                                                                                                                                                                                              |
-| `vpaid`           | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  |
-| `schedule`        | Yes      | n/a     | An array of schedule items. If provided, the `url` and `xml` properties of this object will be ignored                                                                                                                   |
+| Name                        | Optional | Default | Description                                                                                                                                                                                                              |
+|-----------------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `url`                       | Yes      | n/a     | URL that responds with a VAST XML ad tag. Can be an array of URLs to be used as fallbacks (Ad Waterfall) - if the first URL fails to get ads, then the next URL will be tried, and so on until a VAST with ads is found. |
+| `xml`                       | Yes      | n/a     | The VAST XML ad tag. Use as an alternative to `url`. Can be a String or XMLDocument.                                                                                                                                     |
+| `seekEnabled`               | Yes      | `false` | Enable the player seek control when advert is playing. `controlsEnabled` must be enabled also.                                                                                                                           |
+| `controlsEnabled`           | Yes      | `false` | Enable the player controls (pause, play, volume) when advert is playing                                                                                                                                                  |
+| `wrapperLimit`              | Yes      | `10`    | Maximum number of VAST wrappers (aka VAST request redirects) allowed                                                                                                                                                     |
+| `withCredentials`           | Yes      | `true`  | Enable third-party cookies on the VAST request                                                                                                                                                                           |
+| `skip`                      | Yes      | `0`     | Number of seconds the user has to wait before the advert can be skipped                                                                                                                                                  |
+| `displayRemainingTime`      | Yes      | `false` | Display the remaining time until the ad ends                                                                                                                                                                             |
+| `displayRemainingTimeIcons` | Yes      | `false` | Display play/pause and mute/unmute icons before the remaining time message                                                                                                                                               |
+| `messages`                  | Yes      | `{}`    | See Messages options below                                                                                                                                                                                               |
+| `companion`                 | Yes      | `{}`    | See Companion options below                                                                                                                                                                                              |
+| `vpaid`                     | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  |
+| `schedule`                  | Yes      | n/a     | An array of schedule items. If provided, the `url` and `xml` properties of this object will be ignored                                                                                                                   |
+
+##### Messages Options
+
+| Name            | Optional | Default                         | Description                                                                                                                                                                                      |
+|-----------------|----------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `skip`          | Yes      | `Skip`                          | Message displayed on the clickeable button to skip the ad                                                                                                                                        |
+| `skipCountdown` | Yes      | `Skip in {seconds}...`          | Message displayed for the countdown to enable skip of the ad. `{seconds}` will be replaced with the number of seconds left to skip the ad                                                        |
+| `remainingTime` | Yes      | `This ad will end in {seconds}` | Message displayed for the countdown to the end of the ad. `{seconds}` will be replaced with the number of seconds left to the end of the ad. Displayed only if `displayRemainingTime` is enabled |
+
 
 ##### Companion Options
 

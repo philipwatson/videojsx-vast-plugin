@@ -18,6 +18,11 @@ const DEFAULT_OPTIONS = Object.freeze({
   skip: 0,
   displayRemainingTime: false,
   displayRemainingTimeIcons: false,
+  messages: {
+    skip: 'Skip',
+    skipCountdown: 'Skip in {seconds}...',
+    remainingTime: 'This ad will end in {seconds}',
+  },
   vpaid: {
     containerId: undefined,
     containerClass: 'vjs-vpaid-container',
