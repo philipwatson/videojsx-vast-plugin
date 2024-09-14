@@ -138,7 +138,12 @@ export class VPAIDHandler {
           }
 
           const creativeData = {
-            AdParameters: creative.adParameters || ''
+            AdParameters: creative.adParameters || '',
+            Duration: creative.duration || 30,
+            SkipTime: options.skip,
+            ClickURL: creative.videoClickThroughURLTemplate?.url || 'about:blank',
+            All: creative,
+            Options: options,
           };
 
           const videoInstance = options.vpaid.videoInstance;
@@ -223,8 +228,8 @@ export class VPAIDHandler {
              * @param {string} id
              * @param {boolean} playerHandles
              */
-            (url, id, playerHandles) => {
-              if (playerHandles) {
+            ({url, id, playerHandles}) => {
+              if (!playerHandles) {
                 tracker.once('clickthrough', resolvedUrl => {
                   window.open(resolvedUrl, '_blank');
                 });
