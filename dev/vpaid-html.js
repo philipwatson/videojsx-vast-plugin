@@ -49,12 +49,8 @@ VpaidHtmlPlayer.prototype.initAd = function(width, height, viewMode, desiredBitr
 
   this.slot_ = environmentVars.slot;
 
-  console.log('11initAd creativeData', creativeData);
-  console.log('11initAd environmentVars', environmentVars);
-
   try {
     this.parameters_ = JSON.parse(creativeData['AdParameters']);
-    console.log('initAd parameters:', this.parameters_);
 
     if (creativeData.Duration) {
       this.attributes_['duration'] = creativeData.Duration;
@@ -76,7 +72,6 @@ VpaidHtmlPlayer.prototype.initAd = function(width, height, viewMode, desiredBitr
     console.error('Error parsing AdParameters:', e);
   }
 
-  this.log('initAd ' + width + 'x' + height + ' ' + viewMode + ' ' + desiredBitrate);
   this.createIframe_();
 
   this.callEvent_('AdLoaded');
@@ -133,7 +128,6 @@ VpaidHtmlPlayer.prototype.createIframe_ = function() {
 };
 
 VpaidHtmlPlayer.prototype.onMessageReceived_ = function(event) {
-  console.log('[JS] onMessageReceived_ - event', event.data);
   if (event.source === this.iframe_.contentWindow) {
     var message = event.data;
     if (message.type === 'vpaid' && message.event) {
@@ -148,8 +142,7 @@ VpaidHtmlPlayer.prototype.onMessageReceived_ = function(event) {
 };
 
 VpaidHtmlPlayer.prototype.startAd = function() {
-  console.log('[JS] [startAd] Posting start message to iframe');
-  this.iframe_.contentWindow.postMessage({type: 'vpaid', action: 'start'}, '*');
+  //this.iframe_.contentWindow.postMessage({type: 'vpaid', action: 'start'}, '*');
   this.callEvent_('AdStarted');
 
   this.startSkipTimer_();
@@ -265,7 +258,7 @@ VpaidHtmlPlayer.prototype.skipAd = function() {
 };
 
 VpaidHtmlPlayer.prototype.subscribe = function(aCallback, eventName, aContext) {
-  this.log('Subscribe ' + eventName);
+  // this.log('Subscribe ' + eventName);
   var callBack = aCallback.bind(aContext);
   this.eventsCallbacks_[eventName] = callBack;
 };
@@ -328,7 +321,6 @@ VpaidHtmlPlayer.prototype.log = function(message) {
 };
 
 VpaidHtmlPlayer.prototype.callEvent_ = function(eventType, data) {
-  console.log('[JS] callEvent_ ' + eventType);
   if (eventType in this.eventsCallbacks_) {
   this.eventsCallbacks_[eventType]({data});
   }

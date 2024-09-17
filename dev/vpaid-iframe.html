@@ -58,75 +58,15 @@
     </div>
 
     <script>
-        let adDuration = 30; // Duration in seconds
-        let remainingTime = adDuration;
-        let timer;
-        let skipTime = 8; // Skip time in seconds as per your configuration
-
-        function startAd() {
-            // sendMessage('AdStarted');
-            // timer = setInterval(() => {
-            //     remainingTime--;
-            //     if (remainingTime <= 0) {
-            //         stopAd();
-            //     }
-            // }, 1000);
-        }
-
-        function stopAd() {
-            clearInterval(timer);
-            sendMessage('AdStopped');
-        }
-
         function sendMessage(eventName) {
             console.log('[IFRAME][sendMessage] Sending message from iframe:', eventName);
             window.parent[0].postMessage({type: 'vpaid', event: eventName}, '*');
         }
 
-        function sendPixel(url) {
-            const img = new Image();
-            img.src = url;
-        }
-
-        window.addEventListener('message', function(event) {
-            console.log('[IFRAME] Iframe received message:', event.data);
-            if (event.data.type === 'vpaid') {
-                switch(event.data.action) {
-                    case 'start':
-                        startAd();
-                        break;
-                    case 'stop':
-                        stopAd();
-                        break;
-                    case 'pause':
-                        clearInterval(timer);
-                        sendMessage('AdPaused');
-                        break;
-                    case 'resume':
-                        startAd();
-                        sendMessage('AdPlaying');
-                        break;
-                    case 'resize':
-                        // Handle resize if needed
-                        break;
-                    case 'setVolume':
-                        // Handle volume change if needed
-                        break;
-                }
-            }
-        }, false);
-
         document.getElementById('clickThrough').addEventListener('click', function() {
-        console.log('[IFRAME] Click through event sending...');
-        window.parent[0].postMessage({
-          type: 'vpaid',
-          event: 'AdClickThru'
-        }, '*');
-      });
-
-        window.addEventListener('load', function() {
-            //sendMessage('AdLoaded');
+          sendMessage('AdClickThru');
         });
+
     </script>
 </body>
 </html>
