@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPAID HTML Ad</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #adContainer {
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #adContent {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        #clickThrough {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #skipButton {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="adContainer">
+        <div id="adContent">
+            <h1>Your Ad Content Here</h1>
+            <p>This is a sample VPAID HTML ad.</p>
+            <button id="clickThrough">Learn More</button>
+        </div>
+        <button id="skipButton">Skip Ad</button>
+    </div>
+
+    <script>
+        function sendMessage(eventName) {
+            console.log('[IFRAME][sendMessage] Sending message from iframe:', eventName);
+            window.parent[0].postMessage({type: 'vpaid', event: eventName}, '*');
+        }
+
+        document.getElementById('clickThrough').addEventListener('click', function() {
+          sendMessage('AdClickThru');
+        });
+
+    </script>
+</body>
+</html>
