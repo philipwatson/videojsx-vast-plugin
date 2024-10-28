@@ -171,6 +171,10 @@ export class VastPlugin extends Plugin {
 
     player.on('readyforpostroll', () => {
       timedOut = false;
+      if (!postRollScheduleItem) {
+        player.trigger('nopostroll');
+        return;
+      }
       adLoader.loadAds(postRollScheduleItem)
         .then(trackedAds => {
           if (timedOut) {
@@ -200,45 +204,57 @@ export class VastPlugin extends Plugin {
       startAdBreak();
     });
 
-    const signalAdsReady = once(() => {
-      // Can only signal 'adsready' in Preroll and BeforePreroll states (in videojs-contrib-ads).
-      // So we need to signal even when we have no pre-rolls - because we may get mid or post rolls later.
-      player.trigger('adsready');
-    })
+    player.on('contentchanged', () => {
+      // content will most likely have a different length so we need to recalculate offsets again later
+      midRollScheduleItems.forEach(item => delete item.offsetInSeconds);
 
-    // TODO: calculate reasonable timeout based on contrib-ads settings
-    setTimeout(signalAdsReady, 3000);
+      startAds();
+    });
 
     const adLoader = new AdLoader(vastClient, new VASTParser(), new AdSelector(), options);
-    adLoader.loadAds(preRollScheduleItem)
-      .then(trackedAds => {
-        if (timedOut) {
-          trackedAds.forEach(ad => {
-            ad.linearAdTracker.error({
-              ERRORCODE: 301 // VAST redirect timeout reached
-            });
-          })
-        }
-        else if (trackedAds.length > 0) {
-          ads.push(...trackedAds);
-          currentAd = null;
-          // do not start ad break here
-        }
-        else {
-          player.trigger('nopreroll');
-        }
-      })
-      .catch(err => {
-        // eslint-disable-next-line no-console
-        console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
-        player.trigger('nopreroll');
-      })
-      .finally(() => {
-        signalAdsReady();
-        if (autoplay) {
-          player.play();
-        }
+
+    function startAds() {
+      const signalAdsReady = once(() => {
+        // Can only signal 'adsready' in Preroll and BeforePreroll states (in videojs-contrib-ads).
+        // So we need to signal even when we have no pre-rolls - because we may get mid or post rolls later.
+        player.trigger('adsready');
       });
+
+      // TODO: calculate reasonable timeout based on contrib-ads settings
+      setTimeout(signalAdsReady, 3000);
+
+      adLoader.loadAds(preRollScheduleItem)
+        .then(trackedAds => {
+          if (timedOut) {
+            trackedAds.forEach(ad => {
+              ad.linearAdTracker.error({
+                ERRORCODE: 301 // VAST redirect timeout reached
+              });
+            })
+          }
+          else if (trackedAds.length > 0) {
+            ads.push(...trackedAds);
+            currentAd = null;
+            // do not start ad break here
+          }
+          else {
+            player.trigger('nopreroll');
+          }
+        })
+        .catch(err => {
+          // eslint-disable-next-line no-console
+          console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
+          player.trigger('nopreroll');
+        })
+        .finally(() => {
+          signalAdsReady();
+          if (autoplay) {
+            player.play();
+          }
+        });
+    }
+
+    startAds();
 
     /**
      * Create Source Objects
@@ -282,8 +298,7 @@ export class VastPlugin extends Plugin {
 
           if (nonStreamingMediaFiles.length > 0) {
             player.src(createSourceObjects(nonStreamingMediaFiles));
-          }
-          else if (streamingMediaFiles.length > 0) {
+          } else if (streamingMediaFiles.length > 0) {
             let assetDuration = currentAd.linearAdTracker.assetDuration;
             if (assetDuration == null || assetDuration < 1) {
               console.log('Streaming ads must have a duration');
@@ -308,8 +323,6 @@ export class VastPlugin extends Plugin {
         }
         showCompanionAd();
       } else {
-        currentAd = null;
-        adCount = 0;
         endAdBreak();
       }
     }
@@ -482,9 +495,10 @@ export class VastPlugin extends Plugin {
     }
 
     const endAdBreak = () => {
+      currentAd = null;
+      adCount = 0;
       player.ads.endLinearAdMode();
       tearDownEvents();
-      console.log('Playing content');
     }
   }
 }
