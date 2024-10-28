@@ -13,7 +13,7 @@
             </Impression>
             <Creatives>
                 <Creative AdID="123-Video">
-                    <Linear>
+                    <Linear skipoffset="70%">
                         <Duration>00:00:05</Duration>
                         <TrackingEvents>
                             <Tracking event="creativeView">

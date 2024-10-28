@@ -35,7 +35,11 @@
     maxHeight: 250
   };
 
-  player.vast({url: 'http://localhost:9999/vast.xml', skip: 8, companion: companion});
+  player.vast({url: 'http://localhost:9999/vast.xml',
+    skip: 1,
+    companion: companion,
+    honorSkipOffset: true
+  });
 </script>
 
 </body>
