@@ -32,7 +32,8 @@ const DEFAULT_OPTIONS = Object.freeze({
     elementId: null,
     maxWidth: 0,
     maxHeight: 0
-  }
+  },
+  honorSkipOffset: false,
 });
 
 /**
@@ -293,6 +294,8 @@ class VastPlugin extends Plugin {
             currentAd.skipAfterDuration = true;
           }
           ui.duration = currentAd.linearAdTracker.assetDuration || 0;
+          const skipDelay = currentAd.linearAdTracker.skipDelay;
+          ui.skipDelay = skipDelay != null && options.honorSkipOffset ? skipDelay : options.skip;
         } else {
           vpaidHandler.handle(currentAd.linearAdTracker)
             .then(() => {

@@ -8,6 +8,7 @@ export class UI extends videojs.EventTarget {
     this.options = options;
     // duration in seconds. useful for streaming ads where `player.duration()` will always give 0.
     this.duration = 0;
+    this.skipDelay = 0;
 
     /** @type {Object} */
     this.originalState = {
@@ -125,6 +126,9 @@ export class UI extends videojs.EventTarget {
     const player = this.player;
     const originalState = this.originalState;
 
+    this.duration = 0;
+    this.skipDelay = 0;
+
     player.controls(originalState.controlsEnabled);
 
     if (originalState.seekEnabled) {
@@ -150,9 +154,9 @@ export class UI extends videojs.EventTarget {
   }
 
   #onAdPlay = () => {
-    const skip = this.options.skip;
+    const skipDelay = this.skipDelay;
     const player = this.player;
-    if (skip > 0 && (player.duration() || this.duration) >= skip) {
+    if (skipDelay > 0 && (player.duration() || this.duration) >= skipDelay) {
       this.skipButtonElement.style.display = 'block';
 
       if (this.options.displayRemainingTime) {
@@ -172,7 +176,7 @@ export class UI extends videojs.EventTarget {
   #onTimeUpdate = () => {
     this.player.loadingSpinner.el().style.display = 'none';
 
-    const timeLeft = Math.ceil(this.options.skip - this.player.currentTime());
+    const timeLeft = Math.ceil(this.skipDelay - this.player.currentTime());
 
     if (this.options.displayRemainingTime) {
       const remainingTimeLeft = Math.ceil(this.player.remainingTime());
