@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Player Example</title>
+</head>
+
+<body>
+
+<!-- 'Big Buck Bunny' licensed under CC 3.0 by the Blender foundation. Hosted by archive.org -->
+<!-- Poster from peach.blender.org -->
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217">
+    <source id ="mysrc" src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4" type="video/mp4">
+    Your browser does not support video.
+</video>
+<div id="companion"></div>
+
+<script src="http://localhost:9999/bundle/player.js"></script>
+
+<script>
+  var player = videojs('vid1');
+
+  // language=XML
+  var xml = '<VAST version="2.0"><Ad id="Ad"><Wrapper><AdSystem>AdScale</AdSystem><VASTAdTagURI><![CDATA[http://localhost:9999/vast.xml]]></VASTAdTagURI></Wrapper></Ad>\n</VAST>';
+
+  var companion = {
+    elementId: "companion",
+    maxWidth: 300,
+    maxHeight: 250
+  };
+
+  player.vast({
+    schedule: [
+      {
+        offset: 'pre',
+        url: 'http://localhost:9999/vast.xml?comment=pre',
+      },
+      {
+        offset: '75%',
+        url: 'http://localhost:9999/vast.xml?comment=mid',
+      },
+      {
+        offset: 'post',
+        url: 'http://localhost:9999/vast.xml?comment=post',
+      }
+    ],
+    xml: xml,
+    //url: 'http://localhost:9999/vast.xml',
+    skip: 3,
+    companion: companion})
+</script>
+
+<a href="#" onclick="changeSrc()">Change source</a>
+
+<script>
+  function changeSrc() {
+    const newSrc = toggle();
+    player.src(newSrc);
+  }
+
+  const toggle = (function() {
+    let value = false;
+    return function() {
+      value = !value;
+      if (value) {
+        return "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm";
+      } else {
+        return "https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4";
+      }
+    }
+  }());
+</script>
+
+</body>
+</html>

@@ -77,6 +77,8 @@ export class VastPlugin extends Plugin {
     const vpaidHandler = new VPAIDHandler(player, options);
     /** @type {boolean} */
     let timedOut = false;
+    /** @type {string|null} */
+    let currentAdSrc = null;
 
     let schedule = options.schedule;
     if (schedule == null || schedule.length === 0) {
@@ -104,6 +106,14 @@ export class VastPlugin extends Plugin {
     });
 
     const ui = new UI(player, options);
+
+    function reset() {
+      ads.length = 0;
+      if (player.ads.isInAdMode()) {
+        // playNextAd knows how to cleanup when no more ads
+        playNextAd();
+      }
+    }
 
     function skip () {
       if (currentAd?.hasVideoMedia()) {
@@ -171,6 +181,10 @@ export class VastPlugin extends Plugin {
 
     player.on('readyforpostroll', () => {
       timedOut = false;
+      if (!postRollScheduleItem) {
+        player.trigger('nopostroll');
+        return;
+      }
       adLoader.loadAds(postRollScheduleItem)
         .then(trackedAds => {
           if (timedOut) {
@@ -200,45 +214,97 @@ export class VastPlugin extends Plugin {
       startAdBreak();
     });
 
-    const signalAdsReady = once(() => {
-      // Can only signal 'adsready' in Preroll and BeforePreroll states (in videojs-contrib-ads).
-      // So we need to signal even when we have no pre-rolls - because we may get mid or post rolls later.
-      player.trigger('adsready');
-    })
+    player.on('contentchanged', () => {
+      // content will most likely have a different length so we need to recalculate offsets again later
+      midRollScheduleItems.forEach(item => delete item.offsetInSeconds);
 
-    // TODO: calculate reasonable timeout based on contrib-ads settings
-    setTimeout(signalAdsReady, 3000);
+      startAds();
+    });
+
+    player.on('adloadstart', () => {
+      const src = player.currentSrc();
+      // something outside this plugin changed the video source during ad play
+      if (src !== currentAdSrc) {
+        // we are going to a different content source so we don't want a full restore
+        player.ads.disableNextSnapshotRestore = true;
+
+        // do partial restore instead (will style be enough?)
+        const snapshotObject = player.ads.snapshot;
+        if (snapshotObject) {
+          const tech = player.$('.vjs-tech');
+          if (tech && 'style' in snapshotObject) {
+            tech.setAttribute('style', snapshotObject.style || '');
+          }
+        }
+
+        // contrib-ads don't support changing source during ad play.
+        // so we set we contentSrc ourselves (this is how contrib-ads tracks current content source).
+        const oldSource = player.ads.contentSrc;
+        player.ads.contentSrc = src;
+
+        // this includes calling endLinearMode
+        reset();
+
+        // transition from ad state with content resuming to content state (so that
+        // startLinearMode will work)
+        player.trigger('contentresumed');
+
+        // contentchanged = trigger new ad workflow in contrib-ads
+        player.trigger('contentchanged');
+
+        // we'll support deprecated event until it's removed from contrib-ads
+        player.trigger({
+          type: 'contentupdate',
+          oldValue: oldSource,
+          newValue: src
+        });
+      }
+    });
 
     const adLoader = new AdLoader(vastClient, new VASTParser(), new AdSelector(), options);
-    adLoader.loadAds(preRollScheduleItem)
-      .then(trackedAds => {
-        if (timedOut) {
-          trackedAds.forEach(ad => {
-            ad.linearAdTracker.error({
-              ERRORCODE: 301 // VAST redirect timeout reached
-            });
-          })
-        }
-        else if (trackedAds.length > 0) {
-          ads.push(...trackedAds);
-          currentAd = null;
-          // do not start ad break here
-        }
-        else {
-          player.trigger('nopreroll');
-        }
-      })
-      .catch(err => {
-        // eslint-disable-next-line no-console
-        console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
-        player.trigger('nopreroll');
-      })
-      .finally(() => {
-        signalAdsReady();
-        if (autoplay) {
-          player.play();
-        }
+
+    function startAds() {
+      const signalAdsReady = once(() => {
+        // Can only signal 'adsready' in Preroll and BeforePreroll states (in videojs-contrib-ads).
+        // So we need to signal even when we have no pre-rolls - because we may get mid or post rolls later.
+        player.trigger('adsready');
       });
+
+      // TODO: calculate reasonable timeout based on contrib-ads settings
+      setTimeout(signalAdsReady, 3000);
+
+      adLoader.loadAds(preRollScheduleItem)
+        .then(trackedAds => {
+          if (timedOut) {
+            trackedAds.forEach(ad => {
+              ad.linearAdTracker.error({
+                ERRORCODE: 301 // VAST redirect timeout reached
+              });
+            })
+          }
+          else if (trackedAds.length > 0) {
+            ads.push(...trackedAds);
+            currentAd = null;
+            // do not start ad break here
+          }
+          else {
+            player.trigger('nopreroll');
+          }
+        })
+        .catch(err => {
+          // eslint-disable-next-line no-console
+          console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
+          player.trigger('nopreroll');
+        })
+        .finally(() => {
+          signalAdsReady();
+          if (autoplay) {
+            player.play();
+          }
+        });
+    }
+
+    startAds();
 
     /**
      * Create Source Objects
@@ -282,8 +348,8 @@ export class VastPlugin extends Plugin {
 
           if (nonStreamingMediaFiles.length > 0) {
             player.src(createSourceObjects(nonStreamingMediaFiles));
-          }
-          else if (streamingMediaFiles.length > 0) {
+            currentAdSrc = player.src();
+          } else if (streamingMediaFiles.length > 0) {
             let assetDuration = currentAd.linearAdTracker.assetDuration;
             if (assetDuration == null || assetDuration < 1) {
               console.log('Streaming ads must have a duration');
@@ -291,6 +357,7 @@ export class VastPlugin extends Plugin {
               return;
             }
             player.src(createSourceObjects(streamingMediaFiles));
+            currentAdSrc = player.src();
             currentAd.skipAfterDuration = true;
           }
           ui.duration = currentAd.linearAdTracker.assetDuration || 0;
@@ -308,8 +375,6 @@ export class VastPlugin extends Plugin {
         }
         showCompanionAd();
       } else {
-        currentAd = null;
-        adCount = 0;
         endAdBreak();
       }
     }
@@ -482,9 +547,11 @@ export class VastPlugin extends Plugin {
     }
 
     const endAdBreak = () => {
+      currentAdSrc = null;
+      currentAd = null;
+      adCount = 0;
       player.ads.endLinearAdMode();
       tearDownEvents();
-      console.log('Playing content');
     }
   }
 }
