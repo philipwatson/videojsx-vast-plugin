@@ -401,11 +401,10 @@ export class VPAIDHandler {
     toggleMuteButton.addEventListener('click', () => {
       this.#muted = !this.#muted;
 
-      if (this.#muted) {
-        adUnit.setAdVolume(0);
-      } else {
-        adUnit.setAdVolume(this.#volume || 1);
-      }
+      const newVolume = this.#muted ? 0 : (this.#volume || 1);
+
+      adUnit.setAdVolume(newVolume, (/*error, callback*/)=>{});
+
       // NOTE: the mute icon button will be updated via the AdVolumeChange event (triggered by the adUnit).
     });
 
