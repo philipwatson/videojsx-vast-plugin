@@ -103,6 +103,9 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
 .vpaid-icon-placeholder {
     font-family: VideoJS;
     font-size: 3.0em;
+    z-index: 2;
+    opacity: 0.5;
+    color: #ffffff;
 }
 
 .vpaid-icon-placeholder:before {
