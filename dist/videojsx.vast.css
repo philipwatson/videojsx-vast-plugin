@@ -80,6 +80,7 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
     height: 4.0em;
     bottom: 0;
     left: 0;
+    z-index: 100;
 }
 
 .vpaid-mute:before {
@@ -104,7 +105,6 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
     font-family: VideoJS;
     text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
     font-size: 3.0em;
-    z-index: 2;
     color: #ffffff;
     opacity: 0.3;
 }
