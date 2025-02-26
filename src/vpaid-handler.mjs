@@ -1,7 +1,7 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
 import window from 'global/window.js';
 import document from 'global/document.js';
-import {once} from './utils.mjs';
+import {isNotBlankString, once} from './utils.mjs';
 import {createVASTContext} from "./event.mjs";
 
 const VALID_TYPES = ['application/x-javascript', 'text/javascript', 'application/javascript'];
@@ -240,13 +240,21 @@ export class VPAIDHandler {
              * @param {boolean} playerHandles
              */
             ({url, id, playerHandles}) => {
-              if (!playerHandles) {
+              if (playerHandles) {
                 tracker.once('clickthrough', resolvedUrl => {
                   window.open(resolvedUrl, '_blank');
                 });
+                if (isNotBlankString(url)) {
+                  tracker.click(url);
+                } else {
+                  tracker.click();
+                }
+              } else {
+                // We just trigger the click event pixels (no click-through).
+                // The VPAID creative itself will open the landing page.
+                tracker.click();
               }
-              // The url here is a fallback - the tracker will use VAST click url if it exists.
-              tracker.click(url);
+
               player.trigger('vpaid.AdClickThru');
             }
           );

@@ -49,3 +49,11 @@ export function convertOffsetToSeconds (offsetCode, duration = null) {
 
   return isNaN(result) ? null : result;
 }
+
+export function isString(str) {
+  return typeof str === 'string';
+}
+
+export function isNotBlankString(str) {
+  return isString(str) && str.trim().length !== 0;
+}
