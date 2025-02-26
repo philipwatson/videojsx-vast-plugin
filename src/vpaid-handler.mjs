@@ -1,7 +1,7 @@
 import VPAIDHTML5Client from 'vpaid-html5-client';
 import window from 'global/window.js';
 import document from 'global/document.js';
-import {once} from './utils.mjs';
+import {isNullishOrBlankString, once} from './utils.mjs';
 import {createVASTContext} from "./event.mjs";
 
 const VALID_TYPES = ['application/x-javascript', 'text/javascript', 'application/javascript'];
@@ -229,13 +229,26 @@ export class VPAIDHandler {
              * @param {boolean} playerHandles
              */
             ({url, id, playerHandles}) => {
-              if (!playerHandles) {
+              // We don't want our default for VPAID; there are rules (VPAID 2, section 2.5.4).
+              tracker.removeAllListeners('clickthrough');
+
+              const haveUrl = !isNullishOrBlankString(url);
+
+              if (playerHandles && !haveUrl) {
                 tracker.once('clickthrough', resolvedUrl => {
                   window.open(resolvedUrl, '_blank');
                 });
               }
-              // The url here is a fallback - the tracker will use VAST click url if it exists.
-              tracker.click(url);
+
+              // Trigger click events. Then run the registered the 'clickthrough' listeners
+              // if the URL is resolved from the VAST.
+              tracker.click();
+
+              // Best to open after triggering click events.
+              if (playerHandles && haveUrl) {
+                window.open(url, '_blank');
+              }
+
               player.trigger('vpaid.AdClickThru');
             }
           );
