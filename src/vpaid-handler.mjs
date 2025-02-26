@@ -169,8 +169,8 @@ export class VPAIDHandler {
           }
 
           const environmentVars = {
-            slot: container,
-            videoSlot: videoElement,
+            // slot: container,
+            // videoSlot: videoElement,
             // videoSlotCanAutoPlay: true
           };
 
