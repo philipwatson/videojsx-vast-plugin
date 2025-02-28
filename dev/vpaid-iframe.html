@@ -60,7 +60,7 @@
     <script>
         function sendMessage(eventName) {
             console.log('[IFRAME][sendMessage] Sending message from iframe:', eventName);
-            window.parent[0].postMessage({type: 'vpaid', event: eventName}, '*');
+            window.parent.postMessage({type: 'vpaid', event: eventName}, '*');
         }
 
         document.getElementById('clickThrough').addEventListener('click', function() {

@@ -33,8 +33,6 @@ export class VPAIDHandler {
        * @type {HTMLElement|null}
        */
       let container = null;
-      let containerAttributes = {};
-      let containerIsFixed = false;
 
       /**
        * "timeout" | Error
@@ -91,41 +89,10 @@ export class VPAIDHandler {
 
           player.off('playerresize', resizeAd);
 
-          if (options.vpaid.videoInstance === 'new' && videoElement.parentElement) {
-            videoElement.parentElement.removeChild(videoElement);
-          }
-
           vpaidClient.destroy();
 
-          // Some VPAID creatives don't clean up after themselves
           if (container) {
-            if (containerIsFixed) {
-              container.innerHTML = '';
-
-              const before = containerAttributes;
-              const after = getAttributes(container);
-
-              for (const [key, value] of Object.entries(after)) {
-                if (before.hasOwnProperty(key)) {
-                  if (before[key] !== value) {
-                    // restore changed
-                    container.setAttribute(key, before[key]);
-                  }
-                } else {
-                  // removed added
-                  container.removeAttribute(key);
-                }
-              }
-
-              for (const [key, value] of Object.entries(before)) {
-                if (!after.hasOwnProperty(key)) {
-                  // restore removed
-                  container.setAttribute(key, value);
-                }
-              }
-            } else if (container.parentElement) {
-              container.parentElement.removeChild(container);
-            }
+            container.parentElement.removeChild(container);
             container = null;
           }
         }
@@ -146,24 +113,19 @@ export class VPAIDHandler {
             Options: options,
           };
 
-          const videoInstance = options.vpaid.videoInstance;
-
-          if (videoInstance === 'same') {
-            videoElement = player.tech({kindaKnowWhatImDoing: true}).el();
-          } else if (videoInstance === 'new') {
-            videoElement = window.document.createElement('video');
-            videoElement.style.cssText = 'position:absolute; top:0; left:0; z-index:2 !important;';
-            container.appendChild(videoElement);
-          } else {
-            if (videoInstance !== 'none') {
-              console.log(`${videoInstance} is an invalid videoInstance value. Defaulting to \'none\'.`);
-            }
-            videoElement = null;
-          }
-
+          /*
+            NOTE: 'slot' and 'videoSlot' are handled by the VPAIDHTML5Client.
+            We can provide 'videoSlot' via the VPAIDHTML5Client constructor. But not the 'slot'.
+            The 'slot' will be created by the VPAIDHTML5Client (<div class="ad-element"></div>).
+            This 'slot' is not the same as the VPAID container. The VPAID container sits within
+            video.js elements (at time of writing, before the control bar) and will house the VPAID
+            friendly iframe (with a parent div). So if the VPAID container is:
+            <div class="vjs-vpaid-container"></div>
+            then it'll look like:
+            <div class="vjs-vpaid-container"><div><iframe src="about:blank"><div class="ad-element"><!-- VPAID script runs here --></div></iframe></div></div>
+           */
           const environmentVars = {
-            slot: container,
-            videoSlot: videoElement,
+            // WARNING: do not add the 'slot' or 'videoSlot' here! Read comment above.
             // videoSlotCanAutoPlay: true
           };
 
@@ -345,23 +307,13 @@ export class VPAIDHandler {
         throw new Error('Invalid VPAID media file: only JavaScript is supported');
       }
 
-      const techScreen = player.el().querySelector('.vjs-tech');
-
-      container = findHtmlContainer(options);
-      if (!container) {
-        // ideally we want to create a fresh container element (no state attributes (i.e. 'data-ad-processed') or
-        // event listeners attached by previous ad)
-        container = createHtmlContainer(options);
-        containerIsFixed = false;
-      } else {
-        containerIsFixed = true;
-      }
-
-      containerAttributes = getAttributes(container);
+      container = createVPAIDContainer(options);
 
       player.el().insertBefore(container, player.controlBar.el());
 
-      const vpaidClient = new VPAIDHTML5Client(container, techScreen, {});
+      const videoElement = determineVideoElement(player, options);
+
+      const vpaidClient = new VPAIDHTML5Client(container, videoElement, {});
 
       vpaidClient.loadAdUnit(vpaidMediaFile.fileURL, adUnitLoad);
     });
@@ -376,51 +328,40 @@ export class VPAIDHandler {
   }
 }
 
+function determineVideoElement(player, options) {
+  const videoInstance = options.vpaid.videoInstance;
+
+  let videoElement;
+
+  if (videoInstance === 'none') {
+    videoElement = null;
+  } else {
+    if (videoInstance !== 'same') {
+      console.log(`${videoInstance} is an invalid videoInstance value. Defaulting to \'same\'.`);
+    }
+    // Same as: player.el().querySelector('.vjs-tech');
+    videoElement = player.tech({kindaKnowWhatImDoing: true}).el();
+    if (videoElement == null) {
+      console.log(`Unable to find the video element for VPAID.`);
+    }
+  }
+  return videoElement;
+}
+
 function validMime(mediaFile) {
     return VALID_TYPES.indexOf(mediaFile.mimeType.trim()) > -1;
 }
 
-function createHtmlContainer(options) {
-    const containerId = options.vpaid.containerId;
+function createVPAIDContainer(options) {
     const containerClass = options.vpaid.containerClass;
 
     const vpaidContainerElement = document.createElement('div');
-
-    if (containerId) {
-      vpaidContainerElement.setAttribute('id', containerId);
-    }
 
     if (containerClass) {
       vpaidContainerElement.classList.add(containerClass);
     }
 
     return vpaidContainerElement;
-}
-
-
-function findHtmlContainer(options) {
-  const containerId = options.vpaid.containerId;
-  const containerClass = options.vpaid.containerClass;
-  let vpaidContainerElement = document.getElementById(containerId);
-
-  if (!vpaidContainerElement) {
-    vpaidContainerElement = document.getElementsByClassName(containerClass)[0];
-  }
-
-  return vpaidContainerElement;
-}
-
-/**
- *
- * @param {HTMLElement} element
- * @return {{}}
- */
-function getAttributes(element) {
-  const obj = {}
-  for (const attr of element.attributes) {
-    obj[attr.name] = attr.value;
-  }
-  return obj;
 }
 
 /**
