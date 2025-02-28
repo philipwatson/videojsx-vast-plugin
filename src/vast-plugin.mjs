@@ -24,7 +24,6 @@ const DEFAULT_OPTIONS = Object.freeze({
     remainingTime: 'This ad will end in {seconds}',
   },
   vpaid: {
-    containerId: undefined,
     containerClass: 'vjs-vpaid-container',
     videoInstance: 'none'
   },

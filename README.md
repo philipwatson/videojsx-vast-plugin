@@ -121,11 +121,10 @@ Example:
 
 ##### VPAID Options
 
-| Name               | Optional | Default                 | Description                                                                                         |
-|--------------------|----------|-------------------------|-----------------------------------------------------------------------------------------------------|
-| `videoInstance`    | Yes      | `'none'`                | Determines which video element to pass to the VPAID ad. Any one of: `'none'`, `'new'` and `'same'`. |
-| `containerId`      | Yes      | `undefined`             | The id of the container. Usage is not recommended.                                                  |
-| `containerllClass` | Yes      | `'vjs-vpaid-container'` | The class name of the container. Usage is not recommended.                                          |
+| Name              | Optional | Default                 | Description                                                                          |
+|-------------------|----------|-------------------------|--------------------------------------------------------------------------------------|
+| `videoInstance`   | Yes      | `'same'`                | Determines which video element to pass to the VPAID ad. Either `'none'` or `'same'`. |
+| `containerClass`  | Yes      | `'vjs-vpaid-container'` | The class name of the container that will house the VPAID iframe.                    |
 
 ##### Schedule Item Options
 
