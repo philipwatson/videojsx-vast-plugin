@@ -13,6 +13,9 @@ export class VPAIDHandler {
   #player
   #options
   #eventTarget
+  #volume
+  #muted
+  #controlBar
 
   constructor(player, options) {
     this.#player = player;
@@ -24,6 +27,8 @@ export class VPAIDHandler {
     this.#cancelled = false;
     this.#started = false
     this.#forceStopDone = false;
+
+    this.setVolume(this.#player.volume());
 
     return new Promise((resolve, reject) => {
       const options = this.#options;
@@ -84,7 +89,8 @@ export class VPAIDHandler {
           return;
         }
 
-        function cleanUp() {
+        const cleanUp = () => {
+          this.removeMuteControl();
           player.controlBar.show();
 
           player.off('playerresize', resizeAd);
@@ -161,9 +167,9 @@ export class VPAIDHandler {
           });
 
           adUnit.subscribe('AdVolumeChange', () => {
-            const lastVolume = player.volume()
             adUnit.getAdVolume((error, currentVolume) => {
               if (error) return;
+              const lastVolume = this.#volume
 
               if (currentVolume === 0 && lastVolume > 0) {
                 tracker.setMuted(true);
@@ -171,7 +177,11 @@ export class VPAIDHandler {
                 tracker.setMuted(false);
               }
 
+              this.setVolume(currentVolume);
+
+              // keep our player in sync
               player.volume(currentVolume);
+
               player.trigger('vpaid.AdVolumeChange');
             });
           });
@@ -269,6 +279,8 @@ export class VPAIDHandler {
           const startLinearAd = () => {
             player.controlBar.hide();
 
+            this.addMuteControl(adUnit);
+
             // A VPAID adunit may (incorrectly?) call AdStarted again for the first quartile event
             const onAdStartedOnce = once(onAdStarted);
             subscribeWithTimeout(adUnit, 'AdStarted', onAdStartedOnce, forceStopAd);
@@ -319,11 +331,67 @@ export class VPAIDHandler {
     });
   }
 
-  // TODO: review. may not need.
+  removeMuteControl() {
+    this.#controlBar?.remove();
+    this.#controlBar = null;
+  }
+
+  addMuteControl(adUnit) {
+    const controlBarDiv = document.createElement('div');
+    controlBarDiv.className = 'vpaid-control-bar';
+
+    this.#controlBar = controlBarDiv;
+
+    const toggleMuteButton = document.createElement('button');
+    toggleMuteButton.type = 'button';
+    toggleMuteButton.className = 'vpaid-toggle-mute-button';
+
+    const toggleMuteSpan = document.createElement('span');
+    toggleMuteSpan.className = 'vpaid-icon-placeholder';
+
+    toggleMuteButton.addEventListener('click', () => {
+      this.#muted = !this.#muted;
+
+      const newVolume = this.#muted ? 0 : (this.#volume || 1);
+
+      adUnit.setAdVolume(newVolume, (/*error, callback*/)=>{});
+
+      // NOTE: the mute icon button will be updated via the AdVolumeChange event (triggered by the adUnit).
+    });
+
+    toggleMuteButton.appendChild(toggleMuteSpan);
+    controlBarDiv.appendChild(toggleMuteButton);
+
+    const player = this.#player;
+
+    player.el().insertBefore(controlBarDiv, player.controlBar.el());
+
+    adUnit.getAdVolume((error, currentVolume) => {
+      if (error) return;
+      this.setVolume(currentVolume);
+    });
+  }
+
+// TODO: review. may not need.
   cancel() {
     this.#cancelled = true;
     if (this.#started) {
       this.#eventTarget.trigger('forceStopAd');
+    }
+  }
+
+  setVolume(v) {
+    this.#volume = v;
+    this.#muted = v === 0;
+    this.updateControlBar();
+  }
+
+  updateControlBar() {
+    if (this.#controlBar != null) {
+      let className = this.#controlBar.className;
+      className = className.replaceAll('mute', '').trim();
+      className += this.#muted ? ' mute' : '';
+      this.#controlBar.className = className;
     }
   }
 }
