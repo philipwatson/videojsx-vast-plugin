@@ -279,7 +279,9 @@ export class VPAIDHandler {
           const startLinearAd = () => {
             player.controlBar.hide();
 
-            this.addMuteControl(adUnit);
+            if (options.vpaid.enableToggleMute) {
+              this.addMuteControl(adUnit);
+            }
 
             // A VPAID adunit may (incorrectly?) call AdStarted again for the first quartile event
             const onAdStartedOnce = once(onAdStarted);

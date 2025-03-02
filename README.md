@@ -121,10 +121,12 @@ Example:
 
 ##### VPAID Options
 
-| Name              | Optional | Default                 | Description                                                                          |
-|-------------------|----------|-------------------------|--------------------------------------------------------------------------------------|
-| `videoInstance`   | Yes      | `'same'`                | Determines which video element to pass to the VPAID ad. Either `'none'` or `'same'`. |
-| `containerClass`  | Yes      | `'vjs-vpaid-container'` | The class name of the container that will house the VPAID iframe.                    |
+| Name               | Optional | Default                 | Description                                                                                                    |
+|--------------------|----------|-------------------------|----------------------------------------------------------------------------------------------------------------|
+| `videoInstance`    | Yes      | `'same'`                | Determines which video element to pass to the VPAID ad. Either `'none'` or `'same'`.                           |
+| `containerClass`   | Yes      | `'vjs-vpaid-container'` | The class name of the container that will house the VPAID iframe.                                              |
+| `enableToggleMute` | Yes      | `false`                 | Show a transparent icon button on the video (bottom-right) that the user can use to mute and unmute the audio. |   
+
 
 ##### Schedule Item Options
 
