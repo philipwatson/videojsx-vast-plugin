@@ -440,6 +440,7 @@ VpaidVideoPlayer.prototype.getAdVolume = function() {
 VpaidVideoPlayer.prototype.setAdVolume = function(value) {
   this.attributes_['volume'] = value;
   this.log('setAdVolume ' + value);
+  this.videoSlot_.volume = value;
   this.callEvent_('AdVolumeChange');
 };
 
