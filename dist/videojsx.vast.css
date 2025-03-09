@@ -74,3 +74,46 @@ Original @ https://github.com/theonion/videojs-vast-plugin (commit bf6ce85fa7632
     bottom: 0;
 }
 
+.vpaid-control-bar {
+    width: 100%;
+    position: absolute;
+    height: 4.0em;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.vpaid-mute:before {
+    font-size: 3.0em;
+    content: "\f104";
+}
+
+.vpaid-unmute:before {
+    font-size: 3.0em;
+    content: "\f107";
+}
+
+.vpaid-toggle-mute-button {
+    text-align: center;
+    position: absolute;
+    bottom: 0.5em;
+    right: 0.5em;
+    cursor: pointer;
+}
+
+.vpaid-icon-placeholder {
+    font-family: VideoJS;
+    text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
+    font-size: 3.0em;
+    color: #ffffff;
+    opacity: 0.3;
+}
+
+.vpaid-icon-placeholder:before {
+    content: "\f107";
+}
+
+.mute .vpaid-icon-placeholder:before {
+    content: "\f104";
+}
+
