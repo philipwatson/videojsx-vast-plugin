@@ -18,7 +18,7 @@ var VpaidHtmlPlayer = function() {
     'remainingTime': 30,
     'skippableState': false,
     'skipTime': 0,
-    'clickUrl': 'about:blank',
+    'clickUrl': null,
     'viewMode': 'normal',
     'width': 0,
     'volume': 1.0
@@ -52,21 +52,15 @@ VpaidHtmlPlayer.prototype.initAd = function(width, height, viewMode, desiredBitr
   try {
     this.parameters_ = JSON.parse(creativeData['AdParameters']);
 
-    if (creativeData.Duration) {
-      this.attributes_['duration'] = creativeData.Duration;
-      this.callEvent_('AdDurationChange');
-    }
-
     if (this.parameters_.duration) {
       this.attributes_['duration'] = this.parseDuration(this.parameters_.duration);
       this.callEvent_('AdDurationChange');
     }
-    if (creativeData.SkipTime) {
-      this.attributes_['skipTime'] = creativeData.SkipTime;
+    if (this.parameters_.skipTime) {
+      this.attributes_['skipTime'] = parseInt(this.parameters_.skipTime);
     }
-
-    if (creativeData.ClickURL) {
-      this.attributes_['clickUrl'] = creativeData.ClickURL;
+    if (this.parameters_.clickUrl) {
+      this.attributes_['clickUrl'] = this.parameters_.clickUrl;
     }
   } catch (e) {
     console.error('Error parsing AdParameters:', e);
