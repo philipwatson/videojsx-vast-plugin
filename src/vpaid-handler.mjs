@@ -111,12 +111,7 @@ export class VPAIDHandler {
           }
 
           const creativeData = {
-            AdParameters: creative.adParameters || '',
-            Duration: creative.duration || 30,
-            SkipTime: options.skip,
-            ClickURL: creative.videoClickThroughURLTemplate?.url || 'about:blank',
-            All: creative,
-            Options: options,
+            AdParameters: creative.adParameters || ''
           };
 
           /*
