@@ -35,8 +35,8 @@ It will look something like this:
 ```html
 <head>
     <!-- video.js framework -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.6.1/video-js.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.6.1/video.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.9/video-js.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.23.9/video.min.js"></script>
 
     <!-- Ads plugin for video.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-ads/7.3.2/videojs.ads.css" rel="stylesheet">
