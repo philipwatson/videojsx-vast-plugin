@@ -64,7 +64,7 @@
                                 <![CDATA[http://localhost:9999/pixel1x1.gif?track=clickTracking]]>
                             </ClickTracking>
                         </VideoClicks>
-                        <AdParameters><![CDATA[{"videos":[{"url":"https://s3-eu-west-1.amazonaws.com/im-tagmanagement-eu-west-1/live/__IMfiles/BrandedPlayerAssets/Deutsche+Bahn/DB_AllesLaeuft_27s_Corporate_MobOpt_1024_576.mp4","mimetype":"video/mp4"}]}]]></AdParameters>
+                        <AdParameters><![CDATA[{"videos":[{"url":"http://localhost:9999/video-960x540-5s.mp4","mimetype":"video/mp4"}]}]]></AdParameters>
                         <MediaFiles>
                             <MediaFile delivery="progressive" type="text/javascript" bitrate="400" width="640" height="360"
                                        scalable="true" maintainAspectRatio="true" apiFramework="VPAID">

@@ -199,6 +199,11 @@ VpaidVideoPlayer.prototype.updateVideoSlot_ = function() {
 
   for (var i = 0; i < videos.length; i++) {
     if (this.videoSlot_.canPlayType(videos[0].mimetype) !== '') {
+      const videoSlotErrorListener = () => {
+        this.callEvent_('AdError');
+        this.videoSlot_.removeEventListener('error', videoSlotErrorListener);
+      };
+      this.videoSlot_.addEventListener('error', videoSlotErrorListener);
       this.videoSlot_.setAttribute('src', videos[0].url);
       foundSource = true;
       break;
@@ -246,7 +251,7 @@ VpaidVideoPlayer.prototype.stopAd = function() {
   var callback = this.callEvent_.bind(this);
   setTimeout(callback, 1200, ['AdStopped']);
 
-  var internalVideo = parent.document.getElementById('internal_video');
+  var internalVideo = parent && parent.document.getElementById('internal_video');
   if (internalVideo) {
     internalVideo.style.display = 'none';
   }
