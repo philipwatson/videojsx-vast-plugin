@@ -25,8 +25,8 @@ async function setupPublisherServer(adserverPort) {
 
   app.use(express.static(projectRoot + '/dist'));
 
-  app.get("/*", (req, res) => {
-    const name = req.path.split('/').pop();
+  app.get("/{*path}", (req, res) => {
+    const name = req.params.path.at(-1);
     if (name.toLowerCase().endsWith("css")) {
       res.type('css');
     } else {
@@ -67,7 +67,7 @@ async function setupAdvertServer() {
     res.type('xml').render('sample01', { port: availablePort, mediaFile: GLOBALS.mediaFile })
   });
 
-  app.get('/track/*', (req, res) => {
+  app.get('/track{/*path}', (req, res) => {
     res.send('');
   });
 
