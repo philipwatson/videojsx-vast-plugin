@@ -1,5 +1,5 @@
 import videojs from 'video.js';
-import {VASTClient, VASTParser} from '@dailymotion/vast-client';
+import {VASTClient, VASTParser, MediaFile} from '@dailymotion/vast-client';
 import document from 'global/document.js';
 import {UI} from './ui.mjs';
 import {AdLoader} from './ad-loader.mjs';
@@ -7,6 +7,7 @@ import {AdSelector} from './ad-selector.mjs';
 import {VPAIDHandler} from './vpaid-handler.mjs';
 import {createVASTContext} from "./event.mjs";
 import {once, cloneJson, convertOffsetToSeconds} from "./utils.mjs";
+import {TrackedAd} from "./tracked-ad.mjs";
 
 const Plugin = videojs.getPlugin('plugin');
 
@@ -38,12 +39,12 @@ const DEFAULT_OPTIONS = Object.freeze({
 /**
  * VastPlugin
  */
-export class VastPlugin extends Plugin {
+class VastPlugin extends Plugin {
 
   /**
    * Constructor
    *
-   * @param {Object} player The videojs object
+   * @param {Object} player The Video.js player object
    * @param {Object} options Plugin config
    */
   constructor(player, options) {
@@ -153,7 +154,6 @@ export class VastPlugin extends Plugin {
                 }
               })
               .catch(err => {
-                // eslint-disable-next-line no-console
                 console.log(`An error occurred when loading ads for the midroll ad break: : ${err?.message}`);
               })
               .finally(() => {
@@ -189,7 +189,6 @@ export class VastPlugin extends Plugin {
           }
         })
         .catch(err => {
-          // eslint-disable-next-line no-console
           console.log(`An error occurred when loading ads for the postroll ad break: : ${err.message}`);
           player.trigger('nopostroll');
         })
@@ -228,7 +227,6 @@ export class VastPlugin extends Plugin {
         }
       })
       .catch(err => {
-        // eslint-disable-next-line no-console
         console.log(`An error occurred when loading ads for the preroll ad break: ${err.message}`);
         player.trigger('nopreroll');
       })
@@ -440,7 +438,7 @@ export class VastPlugin extends Plugin {
 
         const image = document.createElement('img');
 
-        image.src = variation.staticResource;
+        image.src = variation.staticResources[0].url;
 
         hyperLink.appendChild(image);
 
@@ -488,4 +486,9 @@ export class VastPlugin extends Plugin {
   }
 }
 
+// eslint-disable-next-line no-undef
+VastPlugin.VERSION = __VERSION__;
+
 videojs.registerPlugin('vast', VastPlugin);
+
+export {VastPlugin};

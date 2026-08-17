@@ -1,30 +1,49 @@
 {
-  "name": "videojsx-vast-plugin",
+  "name": "@muppy/videojsx-vast-plugin",
   "version": "1.0.0",
-  "description": "HTML5 video player with VAST support",
-  "main": "dist/player.js",
-  "vjsstandard": {
-    "ignore": [
-      "dist",
-      "test",
-      "config",
-      "/*.js",
-      "dev"
-    ]
+  "description": "VAST plugin for Video.js",
+  "keywords": [
+    "ad",
+    "advertising",
+    "iab",
+    "in-stream",
+    "plugin",
+    "vast",
+    "video",
+    "videojs",
+    "vpaid"
+  ],
+  "main": "./dist/videojsx.vast.cjs.js",
+  "module": "./dist/videojsx.vast.es.js",
+  "style": "./dist/videojsx.vast.css",
+  "exports": {
+    ".": {
+      "import": "./dist/videojsx.vast.es.js",
+      "require": "./dist/videojsx.vast.cjs.js",
+      "default": "./dist/videojsx.vast.cjs.js"
+    },
+    "./style.css": "./dist/videojsx.vast.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "clean": "rm -rf dist",
-    "lint": "vjsstandard --errors",
     "start": "webpack-dev-server --config webpack.dev.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "watch": "webpack --config webpack.watch.js",
-    "e2e": "node node_modules/.bin/jest --config jest-e2e.config.mjs"
+    "e2e": "node node_modules/.bin/jest --config jest-e2e.config.mjs",
+    "lint": "eslint src",
+    "release": "release-it"
   },
   "author": "Philip Watson",
   "repository": {
     "type": "git",
-    "url": "https://github.com/philipwatson/videojsx-vast-plugin"
+    "url": "git+https://github.com/philipwatson/videojsx-vast-plugin.git"
   },
   "license": "MIT",
   "dependencies": {
@@ -34,15 +53,19 @@
     "vpaid-html5-client": "github:philipwatson/VPAIDHTML5Client#4d78886004aaf474f5fd2864c6f6edfab4a7f15e"
   },
   "devDependencies": {
-    "@babel/core": "^8.0.1",
-    "@babel/preset-env": "^8.0.2",
+    "@babel/core": "^7.29.7",
+    "@babel/preset-env": "^7.29.7",
+    "@eslint/js": "^10.0.1",
     "@jest/globals": "^30.4.1",
     "babel-loader": "^10.1.1",
     "compression-webpack-plugin": "^12.0.0",
     "cors": "^2.8.6",
     "css-loader": "^7.1.4",
+    "eslint": "^10.8.1",
+    "eslint-plugin-jsdoc": "^63.3.3",
     "express": "^5.2.1",
     "global": "^4.4.0",
+    "globals": "^17.11.0",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
     "jest-puppeteer": "^11.0.0",
@@ -50,9 +73,9 @@
     "mustache-express": "^1.3.2",
     "portfinder": "^1.0.38",
     "puppeteer": "^25.5.0",
+    "release-it": "^21.0.2",
     "style-loader": "^4.0.0",
     "terser-webpack-plugin": "^5.6.1",
-    "videojs-standard": "^9.1.0",
     "webpack": "^5.109.2",
     "webpack-cli": "^7.2.2",
     "webpack-dev-server": "^6.0.0",

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/release-it/schema/release-it.json",
+  "git": {
+    "commitMessage": "Release v${version}",
+    "tagName": "v${version}",
+    "requireCleanWorkingDir": true,
+    "requireBranch": "master",
+    "requireCommits": true
+  },
+  "github": {
+    "release": true,
+    "tokenRef": "GITHUB_RELEASE_TOKEN"
+  },
+  "npm": {
+    "publish": true
+  },
+  "hooks": {
+    "before:init": "rpm run lint",
+    "after:bump": "npm run build",
+    "after:release": "echo Successfully released ${name} v${version} to npm and GitHub!"
+  }
+}

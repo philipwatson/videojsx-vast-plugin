@@ -39,7 +39,7 @@ export function convertOffsetToSeconds (offsetCode, duration = null) {
       const [hours, minutes, seconds] = offsetCode.split(':').slice(-3);
       result = parseInt(hours || 0, 10) * 3600 + parseInt(minutes || 0, 10) * 60 + parseInt(seconds || 0, 10);
     } else {
-      result = parseInt(offsetCode)
+      result = parseInt(offsetCode, 10);
     }
   }
 

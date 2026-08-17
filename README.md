@@ -1,34 +1,54 @@
-# videojsx-vast-plugin
+# @muppy/videojsx-vast-plugin
 
+![npm](https://img.shields.io/npm/v/@muppy/videojsx-vast-plugin)
 
-Initially, the code was taken from [videojs-vast-plugin](https://github.com/theonion/videojs-vast-plugin) and made it work with videojs 8.
-It is very different now.
+A [Video.js (legacy)](https://legacy.videojs.org/) plugin for playing VAST and VPAID ads.
 
-This project intends to keep up to date with the videojs and its other dependencies.
+Initially based on [videojs-vast-plugin](https://github.com/theonion/videojs-vast-plugin), it has been substantially rewritten for Video.js 8 and kept up to date with its dependencies.
 
+## Install
 
-## Build
+```bash
+npm install @muppy/videojsx-vast-plugin video.js videojs-contrib-ads
+```
 
-NodeJs and its package manager (npm) is required to build.
-
-Run `npm install` then `npm run-script build`.
-
-The build creates two independent artifacts in the `dist/` folder:
-
-| Artifact Name | Files                               | Description                                                              |
-|---------------|-------------------------------------|--------------------------------------------------------------------------|
-| Plugin        | videojsx.vast.js, videojsx.vast.css | Standalone plugin that can be integrated to an external video.js player. |
-| Video Player  | player.js                           | A file that has video.js, css and other dependencies bundled in.         |
-
-Also, every JavaScript `.js` file has a compressed version `.js.gz`
+`video.js` and `videojs-contrib-ads` are peer dependencies — they are required at runtime and are not bundled in the module builds.
 
 ## Usage
 
-### Setting Up Plugin Scripts
+There are 3 ways to use this: import the module to create your own player or plugin, or simply use the plugin script or the all-in-one player script.  
 
-Include this plugin (**videojsx.vast.css** and **videojsx.vast.js**) and its dependencies.
+### Module
 
-Ordering does matter. Be sure you request `video.js` first and `videojs-contrib-ads` anywhere before `videojsx.vast.js`.
+To be used by your chosen bundler or build tool.
+
+Like videojs-contrib-ads, importing the plugin as a side effect — it registers itself automatically on the `videojs` instance:
+
+```js
+import videojs from 'video.js';
+import 'videojs-contrib-ads';
+import '@muppy/videojsx-vast-plugin';
+
+import 'video.js/dist/video-js.css';
+import '@muppy/videojsx-vast-plugin/style.css';
+ 
+// ... export something or get straight to it, you know the drill.
+const player = videojs('vid1');
+player.vast({ url: 'https://your-vast-url.com/vast.xml', skip: 8 });
+```
+
+CommonJS works the same way — the `require` call registers the plugin as a side effect:
+
+```js
+require('videojs-contrib-ads');
+require('@muppy/videojsx-vast-plugin');
+```
+
+### Standalone Plugin Script
+
+Host the files `./dist/videojsx.vast.css` and `./dist/videojsx.vast.js` somewhere. The CSS is optional - you may want to apply different styling. 
+
+Remember to also add the dependencies on the page: Video.js and videojs-contrib-ads. Load ordering does matter. Be sure you request Video.js first and videojs-contrib-ads anywhere before `videojsx.vast.js`.
 
 It will look something like this:
 
@@ -48,29 +68,34 @@ It will look something like this:
 </head>
 ```
 
-### Setting Up Video Player Script
+### All-In-One Player Script
 
-Put anywhere before you start using it. For example, in the head section:
+A great way to get started quickly.
+
+Take the `./dist/player.js` file and host it somewhere.
+
+`player.js` bundles Video.js, videojs-contrib-ads, and all CSS into a single file — nothing else is needed:
 
 ```html
 <head>
-    <script src="http://where-you-host-the-plugin.com/player.js"></script>
+    <script src="https://where-you-host-the-plugin.com/player.js"></script>
 </head>
 ```
 
+## Usage
 
 ### General Use
 
-Example:
+Simple example:
 ```html
-<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="your-poster.jpg">
+<video id="vid1" width="640" height="400" controls class="video-js vjs-default-skin" data-setup='{"autoplay":false}' poster="optional-poster.jpg">
   <source id ="mysrc" src="your-content.mp4" type="video/mp4">
   Your browser does not support video.
 </video>
 <div id="companion"></div>
 
 <script>
-  var player = videojs('vid1');
+  var player = videojs("vid1");
 
   var companion = {
     elementId: "companion",
@@ -78,11 +103,25 @@ Example:
     maxHeight: 250
   };
 
-  player.vast({url: 'http://your-vast-url.com/vast.xml', skip: 8, companion: companion});
+  player.vast({url: "https://your-vast-url.com/vast.xml", skip: 8, companion: companion});
 </script>
 ```
 
-#### Options
+#### Gotcha
+
+There are many ways to integrate the player onto the page. For example, dynamically adding the elements via JavaScript.
+
+In all cases, be sure `player.vast({...})` is called immediately after Video.js in the same "tick". 
+
+Otherwise, the videojs-contrib-ads, a dependency of this plugin, may error on every page load or occasionally — depends on your integration. If there was a problem, no ad will play, and you'll see this message in the console:
+
+> videojs-contrib-ads has not seen a loadstart event 5 seconds after being initialized, but a source is present. This indicates that videojs-contrib-ads was initialized too late. It must be initialized immediately after video.js in the same tick. As a result, some ads will not play and some media events will be incorrect.
+
+For more information, see https://videojs.github.io/videojs-contrib-ads/integrator/getting-started.html#important-note-about-initialization
+
+If you want to initialize later, simply delay setting the video player's source. Once the source is set, then immediately call `player.vast({...})`. Calling `player.vast({...})` before setting the source also works.
+
+### Options
 
 | Name                        | Optional | Default | Description                                                                                                                                                                                                              |
 |-----------------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -101,7 +140,7 @@ Example:
 | `vpaid`                     | Yes      | `{}`    | See VPAID options below                                                                                                                                                                                                  |
 | `schedule`                  | Yes      | n/a     | An array of schedule items. If provided, the `url` and `xml` properties of this object will be ignored                                                                                                                   |
 
-##### Messages Options
+#### Messages Options
 
 | Name            | Optional | Default                         | Description                                                                                                                                                                                      |
 |-----------------|----------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -110,7 +149,7 @@ Example:
 | `remainingTime` | Yes      | `This ad will end in {seconds}` | Message displayed for the countdown to the end of the ad. `{seconds}` will be replaced with the number of seconds left to the end of the ad. Displayed only if `displayRemainingTime` is enabled |
 
 
-##### Companion Options
+#### Companion Options
 
 | Name        | Optional | Default | Description                                                      |
 |-------------|----------|---------|------------------------------------------------------------------|
@@ -119,7 +158,7 @@ Example:
 | `maxHeight` | Yes      | `0`     | The maximum height allowed for the creative                      |
 
 
-##### VPAID Options
+#### VPAID Options
 
 | Name               | Optional | Default                 | Description                                                                                                    |
 |--------------------|----------|-------------------------|----------------------------------------------------------------------------------------------------------------|
@@ -128,7 +167,7 @@ Example:
 | `enableToggleMute` | Yes      | `false`                 | Show a transparent icon button on the video (bottom-right) that the user can use to mute and unmute the audio. |   
 
 
-##### Schedule Item Options
+#### Schedule Item Options
 
 | Name     | Optional | Default | Description                                         |
 |----------|----------|---------|-----------------------------------------------------|
@@ -147,8 +186,11 @@ Offset values:
 ## Dev Workflow
 
 ### Setup
+
+Clone the project from Github. The source and build scripts are not published to the npm repository. 
+
 This project uses LFS for versioning large files (e.g., mp4). Only useful for development.
-Please see [Git Large File Storage](https://git-lfs.github.com/) on github for details.
+Please see [Git Large File Storage](https://git-lfs.github.com/) on Github for details.
 
 Example setup for Mac OS:
 ```bash
@@ -163,20 +205,35 @@ git lfs checkout
 git lfs fetch
 ```
 
+### Build
+
+NodeJs and its package manager (npm) is required to build.
+
+Run `npm install` then `npm run build`.
+
+The build creates the following files in the `dist/` folder:
+
+| Artifact Name       | Files                                                    | Description                                                              |
+|---------------------|----------------------------------------------------------|--------------------------------------------------------------------------|
+| Plugin Script       | videojsx.vast.js, videojsx.vast.js.gz, videojsx.vast.css | Standalone plugin that can be integrated to an external video.js player. |
+| Video Player Script | player.js, player.js.gz                                  | A file that has video.js, css and other dependencies bundled in.         |
+| ES Module           | videojsx.vast.es.js, videojsx.vast.es.js.map             | For build tools that support ES6 Modules (ESM)                           |
+| CommonJS Module     | videojsx.vast.cjs.js, videojsx.vast.cjs.js.map           | For build tools that support CommonJS Modules                            |
+
+
 ### Workflow
+
 Run `npm start` brings up a development server at port 9999 with automatic background builds.
 
 The page is http://localhost:9999/index.html
 
 The command should automatically open this page.
 
-The build will be triggered when any of the files under `src/` is modified. The currently opened page on port 9999
-should reload automatically.
+The build will be triggered when any of the files under `src/` is modified. The currently opened page on port 9999 should reload automatically.
 
+### Automated Tests
 
-## Testing
-
-Experimental
+Is currently in an experimental state. 
 
 ## Credit
 

@@ -1,3 +1,5 @@
+import {VASTTracker} from '@dailymotion/vast-client';
+
 export class TrackedAd {
   #linearAdTracker
   #companionTracker
