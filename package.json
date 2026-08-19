@@ -1,6 +1,6 @@
 {
   "name": "@muppy/videojsx-vast-plugin",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "VAST plugin for Video.js",
   "keywords": [
     "ad",
