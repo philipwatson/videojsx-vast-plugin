@@ -1,46 +1,13 @@
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const configs = require('./webpack.base.js');
+const webpack = require('webpack');
+const {merge} = require('webpack-merge');
+const packageJson = require('./package.json');
 
-const videoPlayerConfig = {
-    entry: {player: './src/vast-player.mjs'},
-
-    output: {
-        path: `${__dirname}/dist`,
-        filename: '[name].js',
-        chunkFilename: "[name].bundle.js",
-    },
-
-    target: 'web',
-
-    module: {
-        rules: [
-            { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
-            { test: /\.css$/i, use: ["style-loader", "css-loader"] },
-        ],
-    },
-
-    resolve: {
-        modules: ['src', 'node_modules'],
-        extensions: ['.js', '.mjs'],
-    },
-};
-
-const standalonePluginConfig = Object.assign({}, videoPlayerConfig, {
-    entry: {
-        'videojsx.vast': ['./src/vast-plugin.mjs', './src/vast-player.css']
-    },
-    externals: {
-        'video.js': 'videojs'
-    },
-    module: {
-        rules: [
-            { test: /\.js?$/, exclude: /node_modules/, loader: 'babel-loader' },
-            { test: /\.css?$/, exclude: /node_modules/, use: [MiniCssExtractPlugin.loader, 'css-loader'] },
-        ],
-    },
-    plugins: [
-      new MiniCssExtractPlugin()
-    ],
-
-});
-
-module.exports = [videoPlayerConfig, standalonePluginConfig];
+const commonConfigs = configs.map(c => merge(c, {
+  plugins: [
+    new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(packageJson.version),
+    })
+  ]
+}));
+module.exports = commonConfigs;

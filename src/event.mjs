@@ -1,3 +1,5 @@
+import {VASTTracker} from '@dailymotion/vast-client';
+
 /**
  *
  * @param {VASTTracker} vastTracker
@@ -12,6 +14,6 @@ export function createVASTContext(vastTracker) {
       adSequenceId: ad.sequence,
       adId: ad.id,
       creativeAdId: creative.id
-    }
+    };
   }
 }

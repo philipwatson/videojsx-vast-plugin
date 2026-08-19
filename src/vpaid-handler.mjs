@@ -1,3 +1,4 @@
+import videojs from 'video.js';
 import VPAIDHTML5Client from 'vpaid-html5-client';
 import window from 'global/window.js';
 import document from 'global/document.js';
@@ -45,8 +46,6 @@ export class VPAIDHandler {
        * @param adUnit
        */
       const adUnitLoad = (err, adUnit) => {
-        let videoElement;
-
         if (err) {
           reject(err);
           return;
@@ -103,9 +102,9 @@ export class VPAIDHandler {
           }
         }
 
-        const onHandShake = (error, version) => {
+        const onHandShake = (error/*, version*/) => {
           if (error) {
-            log.console(error);
+            console.log(error);
             forceStopAd('Error on VPAID handshake');
             return;
           }
@@ -195,6 +194,7 @@ export class VPAIDHandler {
              * @param {string} id
              * @param {boolean} playerHandles
              */
+            // eslint-disable-next-line no-unused-vars
             ({url, id, playerHandles}) => {
               // We don't want our default for VPAID; there are rules (VPAID 2, section 2.5.4).
               tracker.removeAllListeners('clickthrough');
@@ -415,7 +415,7 @@ function determineVideoElement(player, options) {
     videoElement = null;
   } else {
     if (videoInstance !== 'same') {
-      console.log(`${videoInstance} is an invalid videoInstance value. Defaulting to \'same\'.`);
+      console.log(`${videoInstance} is an invalid videoInstance value. Defaulting to 'same'.`);
     }
     // Same as: player.el().querySelector('.vjs-tech');
     videoElement = player.tech({kindaKnowWhatImDoing: true}).el();

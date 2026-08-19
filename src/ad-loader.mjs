@@ -1,6 +1,7 @@
 import window from "global";
 import {companionFn, linearFn} from "./utils.mjs";
 import {VASTClient, VASTParser, VASTTracker} from '@dailymotion/vast-client';
+import {AdSelector} from './ad-selector.mjs';
 import {TrackedAd} from "./tracked-ad.mjs";
 
 export class AdLoader {
@@ -40,7 +41,7 @@ export class AdLoader {
             } else {
               return ads;
             }
-          }).catch(ignore => {
+          }).catch(() => {
             return [];
           });
         });
@@ -111,8 +112,7 @@ export class AdLoader {
         // Just pick the first suitable companion ad for now
         const options = this.#options;
         const variation = companionCreative.variations
-          .filter(v => v.staticResource)
-          .filter(v => v.type.indexOf('image') === 0)
+          .filter(v => v.staticResources)
           .find(v => parseInt(v.width, 10) <= options.companion.maxWidth && parseInt(v.height, 10) <= options.companion.maxHeight);
 
         if (variation) {
